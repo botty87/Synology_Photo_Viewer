@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+
+    <attr name="scrollMode" >
+        <enum name="alignScroll" value="0"/>
+        <enum name="followScroll" value="1"/>
+        <enum name="normalScroll" value="2" />
+    </attr>
+
+    <declare-styleable name="TvRecyclerView">
+        <attr name="scrollMode"/>
+        <attr name="focusDrawable" format="reference" />
+        <attr name="isAutoProcessFocus" format="boolean" />
+        <attr name="focusScale" format="float" />
+    </declare-styleable>
+
+</resources>

@@ -1,0 +1,2 @@
+include ':app', ':tvrecyclerview'
+rootProject.name='Photo Viewer'

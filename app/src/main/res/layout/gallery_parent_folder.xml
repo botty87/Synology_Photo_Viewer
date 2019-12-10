@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/textViewParentName"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:drawablePadding="8dp"
+    android:textSize="15sp"
+    android:textColor="#ff8a65"
+    android:drawableLeft="@drawable/ic_chevron_24dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:focusableInTouchMode="true"
+    android:focusable="true"
+    android:singleLine="true"
+    android:textStyle="bold"
+    android:ellipsize="marquee"
+    android:text="@string/parent_folder"
+    android:textAllCaps="true"
+    tools:ignore="RtlHardcoded" />

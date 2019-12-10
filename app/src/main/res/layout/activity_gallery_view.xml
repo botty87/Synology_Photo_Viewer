@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="false"
+    android:focusable="false"
+    tools:context=".galleryViewer.GalleryViewActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/navDetailsLayout"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#263238"
+        android:padding="10dp"
+        android:elevation="30dp"
+        app:layout_constraintWidth_percent="0.3"
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <com.botty.tvrecyclerview.TvRecyclerView
+            android:id="@+id/recyclerViewFolders"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:focusable="true"
+            android:layout_marginBottom="5dp"
+            android:scrollbars="none"
+            android:visibility="invisible"
+            app:scrollMode="followScroll"
+            app:focusScale="1"
+            app:focusDrawable="@drawable/folders_background"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/layoutPhotoAlbumDetails" />
+
+        <LinearLayout
+            android:id="@+id/layoutPhotoAlbumDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:id="@+id/textViewAlbumNameTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/album"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"/>
+
+            <com.botty.photoviewer.tools.ScrollTextView
+                android:id="@+id/textViewAlbumName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:paddingTop="5dp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/viewGuide"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        app:layout_constraintLeft_toRightOf="@id/navDetailsLayout"/>
+
+    <com.botty.tvrecyclerview.TvRecyclerView
+        android:id="@+id/recyclerViewPictures"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:focusable="true"
+        android:nextFocusLeft="@id/recyclerViewFolders"
+        app:focusScale="1"
+        app:focusDrawable="@drawable/picture_selected_background"
+        app:scrollMode="alignScroll"
+        android:scrollbars="none"
+        android:paddingBottom="15dp"
+        android:paddingTop="15dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
+        android:clipToPadding="false"/>
+
+    <ProgressBar
+        android:id="@+id/progressPicturesLoader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/recyclerViewPictures"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerViewPictures"
+        app:layout_constraintLeft_toLeftOf="@id/recyclerViewPictures"
+        app:layout_constraintRight_toRightOf="@id/recyclerViewPictures"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

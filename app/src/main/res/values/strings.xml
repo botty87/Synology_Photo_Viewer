@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Synology Photo Viewer</string>
+    <string name="address">Address</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">login</string>
+    <string name="fill_all_fields">Fill all fields!</string>
+    <string name="account_or_password_wrong">No such account or incorrect password</string>
+    <string name="account_disabled">Account disabled</string>
+    <string name="permission_denied">Permission denied</string>
+    <string name="two_step_login">2-step verification code</string>
+    <string name="set_this_folder">set this\nfolder</string>
+    <string name="gallery_name">Gallery name</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="set_gallery_name">Set gallery name</string>
+    <string name="insert_name">Insert name!</string>
+    <string name="add_gallery">Add gallery</string>
+    <string name="existing_connections">Existing connections</string>
+    <string name="no_success_response">No success response</string>
+    <string name="error_code">Error code</string>
+    <string name="error">Error!</string>
+    <string name="parent_folder">parent folder</string>
+    <string name="new_login_required">New login required</string>
+    <string name="con_params_changed_error">Did you change your connection settings? Like password, user or address?</string>
+    <string name="port">Port (optional)</string>
+    <string name="use_https">Use https</string>
+    <string name="connection_exist">Connection already exist!</string>
+    <string name="album">Album</string>
+    <string name="loading">Loading…</string>
+</resources>

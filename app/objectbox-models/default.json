@@ -1,0 +1,109 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:692227462177343660",
+      "lastPropertyId": "8:5472007276549612993",
+      "name": "Gallery",
+      "properties": [
+        {
+          "id": "1:8497584601310949814",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3459781979466232919",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:2955217768719348698",
+          "name": "path",
+          "type": 9
+        },
+        {
+          "id": "6:5922113431095430584",
+          "name": "connectionParamsId",
+          "indexId": "3:2327584762237749589",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "ConnectionParams"
+        },
+        {
+          "id": "8:5472007276549612993",
+          "name": "headerToSet",
+          "type": 1,
+          "flags": 4
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:1004299832487457156",
+      "lastPropertyId": "11:5547587914337866465",
+      "name": "ConnectionParams",
+      "properties": [
+        {
+          "id": "1:7935481060298198755",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5962783854580939830",
+          "name": "user",
+          "type": 9
+        },
+        {
+          "id": "3:5556269323792671800",
+          "name": "password",
+          "type": 9
+        },
+        {
+          "id": "4:2408267645648658881",
+          "name": "address",
+          "type": 9
+        },
+        {
+          "id": "10:4375482724838652616",
+          "name": "port",
+          "type": 5,
+          "flags": 4
+        },
+        {
+          "id": "11:5547587914337866465",
+          "name": "https",
+          "type": 1,
+          "flags": 4
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "2:1004299832487457156",
+  "lastIndexId": "3:2327584762237749589",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [
+    4729535733504229364,
+    6152529289037080809
+  ],
+  "retiredPropertyUids": [
+    2856273561805516046,
+    3395450515099590606,
+    3046255399164376157,
+    2284473903046128393,
+    4214125957605214606,
+    4606765497324401725,
+    2997849584057875355,
+    3066029208325206419
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}

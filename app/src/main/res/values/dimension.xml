@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="folder_size">160dp</dimen>
+    <dimen name="gallery_height">160dp</dimen>
+    <dimen name="gallery_width">200dp</dimen>
+    <dimen name="picture_size">220dp</dimen>
+</resources>
