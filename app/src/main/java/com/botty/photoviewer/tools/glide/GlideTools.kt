@@ -63,12 +63,4 @@ object GlideTools {
             }
             .into(imageView)
     }
-
-    fun setLoaderIntoView(glide: RequestManager,
-                          imageView: ImageView,
-                          context: Context) {
-        glide
-            .load(getPlaceHolder(context))
-            .into(imageView)
-    }
 }

@@ -3,7 +3,6 @@ package com.botty.photoviewer.galleryViewer
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
-import android.util.LruCache
 import android.view.Gravity
 import android.view.View
 import android.view.ViewTreeObserver
@@ -32,7 +31,8 @@ import kotlinx.coroutines.*
 @SuppressLint("SimpleDateFormat")
 class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
-    private val pictureMetaCache by lazy { CacheMetadata(200) }
+    private val pictures = mutableListOf<PictureContainer>()
+    private val picturesMetaCache by lazy { CacheMetadata(200, pictures) }
 
     private lateinit var gallery: Gallery
     private lateinit var sessionParams: SessionParams
@@ -40,7 +40,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private val picturesLoader by lazy {
         ViewModelProvider(this,
-            PicturesLoader.Factory(sessionParams, glideManager, 10))
+            PicturesLoader.Factory(sessionParams, glideManager, pictures, 10))
             .get(PicturesLoader::class.java)
     }
 
@@ -80,7 +80,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private val picturesAdapter by lazy {
         val width = resources.getDimension(R.dimen.picture_size).toInt()
-        PicturesAdapter(glideManager, pictureMetaCache,this)
+        PicturesAdapter(glideManager, picturesMetaCache,pictures, this)
             .apply {
                 setHasStableIds(true)
                 recyclerViewPictures.layoutManager = GridAutofitLayoutManager(this@GalleryViewActivity, width)
@@ -112,7 +112,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             }
     }
 
-    private lateinit var pictures : List<PictureContainer>
     private lateinit var pictureGalleryPath: String
 
     private var isLoadingFolder: Boolean = false
@@ -171,6 +170,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             isLoadingFolder = true
             recyclerViewFolders.hide()
             recyclerViewPictures.hide()
+            recyclerViewPictures.mFocusBorderView?.hide()
             recyclerViewFolders.mFocusBorderView?.hide()
             textViewAlbumNameTitle.hide()
             textViewAlbumName.text = getString(R.string.loading)
@@ -182,6 +182,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             progressPicturesLoader.hide()
             recyclerViewFolders.show()
             recyclerViewFolders.mFocusBorderView?.show()
+            recyclerViewPictures.mFocusBorderView?.show()
             recyclerViewPictures.show()
             textViewAlbumNameTitle.show()
         }
@@ -231,8 +232,9 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                     }
                 }
 
-                pictures = picturesName.await()
-                setNewPictures()
+                picturesName.await().run {
+                    setNewPictures(this)
+                }
                 textViewAlbumName.text = actualPath.lastOrNull() ?: gallery.name
 
                 falsePhotoFocused = false
@@ -255,8 +257,11 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun setNewPictures() {
-        picturesAdapter.notifyNewPictures(pictures)
+    private fun setNewPictures(newPictures: List<PictureContainer>) {
+        pictures.clear()
+        pictures.addAll(newPictures)
+        picturesAdapter.notifyDataSetChanged()
+        picturesLoader.setNewGalleryPath(pictureGalleryPath)
         if(pictures.isEmpty()) {
             return
         }
@@ -265,7 +270,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         recyclerViewLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
             recyclerViewPictures.viewTreeObserver.removeOnGlobalLayoutListener(recyclerViewLayoutListener)
             recyclerViewLayoutListener = null
-            picturesLoader.setNewPictures(pictureGalleryPath, pictures)
             picturesLoader.pictureNotifier.observe(this) { picIndex ->
                 recyclerViewPictures.adapter?.notifyItemChanged(picIndex)
             }
@@ -341,8 +345,13 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private fun onPhotoClick(pos: Int) {
         picturesLoader.cancelDownload(false)
+        val picturesCacheContainer = picturesMetaCache.snapshot().map { entry ->
+            PictureMetaContainer.ParcelablePair(entry.key, entry.value)
+        }
+
         startActivityForResult<FullscreenViewerActivity>(
             FullscreenViewerActivity.PICTURES_LIST_KEY to pictures,
+            FullscreenViewerActivity.METADATA_CACHE_LIST_KEY to picturesCacheContainer,
             FullscreenViewerActivity.PICTURE_GALLERY_PATH_KEY to pictureGalleryPath,
             FullscreenViewerActivity.SESSION_PARAMS_KEY to sessionParams,
             FullscreenViewerActivity.CURRENT_PICTURE_KEY to pos) { result ->
@@ -367,7 +376,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         if(actualPath.isEmpty()) {
             super.onBackPressed()
         } else {
-            recyclerViewFolders.mFocusBorderView?.hide()
             recyclerViewFolders.getChildAt(0).requestFocus()
             recyclerViewPictures.setItemSelected(-1)
             onParentClick()
@@ -379,19 +387,5 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             LogoutWorker.setWorker(this, sessionParams)
         }
         super.onStop()
-    }
-
-    inner class CacheMetadata(size: Int): LruCache<Int, PictureMetaContainer>(size) {
-        override fun create(key: Int?): PictureMetaContainer {
-            pictures.find { picContainer ->
-                picContainer.hashCode == key
-            }?.file.run {
-                try {
-                    return PictureMetaContainer.readFromFile(this)
-                } catch (e: Exception) {
-                    throw PictureMetaContainer.NoMetadataException()
-                }
-            }
-        }
     }
 }

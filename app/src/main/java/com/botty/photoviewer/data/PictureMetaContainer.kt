@@ -1,13 +1,18 @@
 package com.botty.photoviewer.data
 
+import android.os.Parcelable
+import com.botty.photoviewer.tools.DateParceler
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDirectory
+import kotlinx.android.parcel.Parcelize
+import kotlinx.android.parcel.TypeParceler
 import java.io.File
 import java.util.Date
 
-data class PictureMetaContainer(val originDate: Date, val rotation: Int) {
-
+@Parcelize
+@TypeParceler<Date, DateParceler>
+data class PictureMetaContainer(val originDate: Date, val rotation: Int) : Parcelable {
     companion object {
         fun readFromFile(picFile: File?): PictureMetaContainer {
             picFile?.run {
@@ -21,4 +26,7 @@ data class PictureMetaContainer(val originDate: Date, val rotation: Int) {
     }
 
     class NoMetadataException: Exception()
+
+    @Parcelize
+    data class ParcelablePair(val hash: Int, val pictureMetaContainer: PictureMetaContainer) : Parcelable
 }

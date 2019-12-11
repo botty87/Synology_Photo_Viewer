@@ -10,6 +10,7 @@ import androidx.viewpager.widget.ViewPager
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.fullscreenViewer.PicturesAdapter
 import com.botty.photoviewer.data.PictureContainer
+import com.botty.photoviewer.data.PictureMetaContainer
 import com.botty.photoviewer.data.SessionParams
 import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
 import com.bumptech.glide.Glide
@@ -20,6 +21,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
 
     companion object {
         const val PICTURES_LIST_KEY = "pic_list"
+        const val METADATA_CACHE_LIST_KEY = "meta_cache"
         const val CURRENT_PICTURE_KEY = "cur_pic"
         const val PICTURE_GALLERY_PATH_KEY = "pic_gallery_path"
         const val SESSION_PARAMS_KEY = "ses_params"
@@ -28,7 +30,8 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     private lateinit var picturesAdapter: PicturesAdapter
     private lateinit var sessionParams: SessionParams
     private lateinit var galleryPath: String
-    private lateinit var pictures : List<PictureContainer>
+    private val pictures = mutableListOf<PictureContainer>()
+    private val picturesMetaCache by lazy { CacheMetadata(50, pictures) }
     private var currentPicIndex = 0
 
     private val glide by lazy {
@@ -36,7 +39,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     }
     private val picturesLoader by lazy {
         ViewModelProvider(this,
-            PicturesLoader.Factory(sessionParams, glide, 5))
+            PicturesLoader.Factory(sessionParams, glide, pictures,5))
             .get(PicturesLoader::class.java)
     }
 
@@ -48,9 +51,14 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
             intent.run {
                 galleryPath = getStringExtra(PICTURE_GALLERY_PATH_KEY) ?: throw Exception()
                 sessionParams = getParcelableExtra(SESSION_PARAMS_KEY) ?: throw Exception()
-                pictures = getParcelableArrayListExtra(PICTURES_LIST_KEY) ?: throw Exception()
+                pictures.addAll(getParcelableArrayListExtra(PICTURES_LIST_KEY) ?: throw Exception())
+                getParcelableArrayListExtra<PictureMetaContainer.ParcelablePair>(METADATA_CACHE_LIST_KEY)?.run {
+                    forEach {pictureMetaPair ->
+                        picturesMetaCache.put(pictureMetaPair.hash, pictureMetaPair.pictureMetaContainer)
+                    }
+                } ?: throw Exception()
                 currentPicIndex = getIntExtra(CURRENT_PICTURE_KEY, 0)
-                picturesLoader.setNewPictures(galleryPath, pictures)
+                picturesLoader.setNewGalleryPath(galleryPath)
             }
         } catch (e: Exception) {
             finish()

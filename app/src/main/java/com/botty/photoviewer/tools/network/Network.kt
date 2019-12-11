@@ -10,7 +10,6 @@ import com.botty.photoviewer.tools.network.responses.LoginResponse
 import com.botty.photoviewer.tools.network.responses.LogoutResponse
 import com.botty.photoviewer.tools.network.responses.SharesResponse
 import com.botty.photoviewer.tools.network.responses.containers.GenericResponse
-import com.botty.photoviewer.tools.set
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
@@ -43,7 +42,7 @@ object Network {
                 .create(API::class.java)
                 .apply {
                     if(connectionId > 0) {
-                        apiContainer[connectionId.toInt()] = this
+                        apiContainer.append(connectionId.toInt(), this)
                     }
                 }
 

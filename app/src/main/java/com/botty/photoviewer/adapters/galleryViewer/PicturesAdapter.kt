@@ -10,6 +10,7 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
 import com.botty.photoviewer.data.PictureContainer
+import com.botty.photoviewer.galleryViewer.CacheMetadata
 import com.botty.photoviewer.galleryViewer.GalleryViewActivity
 import com.botty.photoviewer.tools.clear
 import com.botty.photoviewer.tools.glide.GlideTools
@@ -20,10 +21,9 @@ import java.util.*
 
 @SuppressLint("SimpleDateFormat")
 class PicturesAdapter(private val glideManager: RequestManager,
-                      private val pictureMetaCache: GalleryViewActivity.CacheMetadata,
+                      private val pictureMetaCache: CacheMetadata,
+                      private val picturesList: List<PictureContainer>,
                       private val context: Context) : RecyclerView.Adapter<GenericHolder>() {
-
-    private var picturesList = emptyList<PictureContainer>()
 
     private val dateParser by lazy {
         SimpleDateFormat("dd MMM yyyy - HH:mm:ss").apply {
@@ -82,10 +82,4 @@ class PicturesAdapter(private val glideManager: RequestManager,
         holder.itemView.textViewDate.clear()
         super.onViewRecycled(holder)
     }
-
-    fun notifyNewPictures(picturesList: List<PictureContainer>) {
-        this.picturesList = picturesList
-        notifyDataSetChanged()
-    }
-
 }

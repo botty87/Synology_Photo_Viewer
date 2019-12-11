@@ -11,18 +11,26 @@ android {
         applicationId "botty.synology.photoviewer"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 2
-        versionName "0.9-alpha"
+        versionCode 3
+        versionName "0.9-alpha1"
     }
     buildTypes {
         release {
+            manifestPlaceholders = [enableCrashReporting:"true"]
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            manifestPlaceholders = [enableCrashReporting:"false"]
         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    androidExtensions {
+        experimental = true
     }
 
     kotlinOptions {

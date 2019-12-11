@@ -1,18 +1,20 @@
 package com.botty.photoviewer.adapters.fullscreenViewer
 
 import android.content.Context
+import android.graphics.Color
 import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import androidx.viewpager.widget.PagerAdapter
 import com.botty.photoviewer.R
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
 import com.botty.photoviewer.tools.glide.GlideTools
-import com.botty.photoviewer.tools.set
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_fullscreen_item.view.imageViewPicture
+import kotlinx.android.synthetic.main.picture_item.view.*
 
 class PicturesAdapter(
     private val pictures: List<PictureContainer>,
@@ -50,8 +52,15 @@ class PicturesAdapter(
                 GlideTools.loadImageIntoView(glide, containerView.imageViewPicture, picture, context)
             }
         } else {
-            GlideTools.setLoaderIntoView(glide, containerView.imageViewPicture, context)
-            currentInstantiateView[position] = containerView
+            CircularProgressDrawable(context).apply {
+                strokeWidth = 5f
+                centerRadius = 30f
+                this.setColorSchemeColors(Color.RED)
+                start()
+            }.let {prog ->
+                containerView.imageViewPicture.setImageDrawable(prog)
+            }
+            currentInstantiateView.append(position, containerView)
         }
     }
 

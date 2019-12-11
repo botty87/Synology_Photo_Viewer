@@ -99,10 +99,6 @@ operator fun <T> AsyncListDiffer<T>.get(pos: Int): T {
     return this.currentList[pos]
 }
 
-operator fun <T> SparseArray<T>.set(key: Int, value: T) {
-    this.put(key, value)
-}
-
 fun Throwable.log() {
     Timber.e(this)
 }

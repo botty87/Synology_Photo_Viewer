@@ -34,7 +34,11 @@ class MyApplication: Application() {
             if(priority == Log.VERBOSE || priority == Log.DEBUG) {
                 return
             }
-            Timber.log(priority, t, message)
+            try {
+                Timber.log(priority, t, message)
+            } catch (e: OutOfMemoryError) {
+                Crashlytics.logException(e)
+            }
             Crashlytics.logException(t)
         }
     }
