@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.AsyncListDiffer
-import androidx.viewpager.widget.ViewPager
 import com.github.florent37.inlineactivityresult.Result
 import com.github.florent37.inlineactivityresult.kotlin.KotlinActivityResult
 import com.github.florent37.inlineactivityresult.kotlin.startForResult

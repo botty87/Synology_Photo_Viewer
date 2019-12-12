@@ -2,7 +2,6 @@ package com.botty.photoviewer.adapters.fullscreenViewer
 
 import android.content.Context
 import android.graphics.Color
-import android.util.SparseArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,8 +17,6 @@ import com.botty.photoviewer.tools.glide.GlideTools
 import com.bumptech.glide.RequestManager
 import com.github.florent37.kotlin.pleaseanimate.please
 import kotlinx.android.synthetic.main.picture_fullscreen_item.view.*
-import kotlinx.android.synthetic.main.picture_fullscreen_item.view.imageViewPicture
-import kotlinx.android.synthetic.main.picture_item.view.*
 import kotlin.math.absoluteValue
 
 class PicturesAdapter(

@@ -1,5 +1,6 @@
 package com.botty.photoviewer.galleryViewer.loader
 
+import android.graphics.drawable.Drawable
 import android.util.SparseArray
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -11,8 +12,13 @@ import com.botty.photoviewer.tools.isEmpty
 import com.botty.photoviewer.tools.log
 import com.botty.photoviewer.tools.notExists
 import com.bumptech.glide.RequestManager
+import com.bumptech.glide.request.FutureTarget
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import kotlinx.coroutines.*
 import timber.log.Timber
+import java.io.File
 
 class PicturesLoader private constructor(private val sessionParams: SessionParams,
                                          private val glide: RequestManager,
@@ -31,6 +37,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
     }
 
     private var downloadPictureJobs = SparseArray<Job>(preloadSize)
+    private var downloadPictureFutureTarget = SparseArray<FutureTarget<File>>(preloadSize)
     private var activeWorkingJob: Job? = null
     @Volatile private var currentDownloadStatus = JobDownloadStatus.NO_WORK
 
@@ -70,11 +77,33 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
             if (pictures[picIndex].file?.notExists() != false) {
                 val picFullPath =
                     sessionParams.getPicFullPath(galleryPath!!, pictures[picIndex].name)
+
+                /*glide
+                    .asFile()
+                    .load(picFullPath)
+                    .into(object : CustomTarget<File>() {
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        }
+
+                        override fun onResourceReady(
+                            resource: File,
+                            transition: Transition<in File>?
+                        ) {
+                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        }
+
+                    })*/
+
+                //TODO test
+                delay(5000)
                 glide
                     .asFile()
                     .load(picFullPath)
                     .submit()
-                    .get()
+                    .apply {
+                        downloadPictureFutureTarget.append(picIndex, this)
+                    }.get()
                     .let { picFile ->
                         pictures[picIndex].file = picFile
                         pictureNotifier.postValue(picIndex)
@@ -153,6 +182,8 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
 
     private fun onJobCompletion(jobIndex: Int, firstIndex: Int, lastIndex: Int) {
         downloadPictureJobs.remove(jobIndex)
+        glide.clear(downloadPictureFutureTarget[jobIndex])
+        downloadPictureFutureTarget.remove(jobIndex)
         if(downloadPictureJobs.isEmpty()) {
             when(currentDownloadStatus) {
                 JobDownloadStatus.CURRENT_PIC -> {

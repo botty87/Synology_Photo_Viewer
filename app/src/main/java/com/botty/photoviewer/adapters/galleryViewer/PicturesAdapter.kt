@@ -11,14 +11,11 @@ import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.galleryViewer.CacheMetadata
-import com.botty.photoviewer.galleryViewer.GalleryViewActivity
 import com.botty.photoviewer.tools.Tools
 import com.botty.photoviewer.tools.clear
 import com.botty.photoviewer.tools.glide.GlideTools
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_item.view.*
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 class PicturesAdapter(private val glideManager: RequestManager,

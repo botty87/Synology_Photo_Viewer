@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.MotionEvent
 import android.view.View
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
@@ -76,7 +75,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
         viewPagerPicture.currentItem = currentPicIndex
 
         picturesLoader.pictureNotifier.observe(this) { picIndex ->
-            picturesAdapter.setPicture(picIndex)
+            findPositionViewAdapter(picIndex)?.run { picturesAdapter.setPicture(picIndex, this) }
         }
 
         picturesLoader.startDownload(currentPicIndex)
@@ -87,8 +86,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
             override fun onPageSelected(position: Int) {
                 picturesLoader.startDownload(position)
                 launch {
-                    val view = findCurrentViewAdapter()
-                    picturesAdapter.setPictureInfo(position, view)
+                    picturesAdapter.setPictureInfo(position, findPositionViewAdapter()!!)
                 }
             }
         })
@@ -99,7 +97,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
             when (event.keyCode) {
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_DPAD_CENTER -> {
-                    picturesAdapter.changePictureVisibility(findCurrentViewAdapter())
+                    picturesAdapter.changePictureVisibility(findPositionViewAdapter()!!)
                     return true
                 }
             }
@@ -107,8 +105,8 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
         return super.dispatchKeyEvent(event)
     }
 
-    private fun findCurrentViewAdapter(): View {
-        val viewId = pictures[viewPagerPicture.currentItem].hashCode.absoluteValue
+    private fun findPositionViewAdapter(pos: Int = viewPagerPicture.currentItem): View? {
+        val viewId = pictures[pos].hashCode.absoluteValue
         return viewPagerPicture.findViewById(viewId)
     }
 
