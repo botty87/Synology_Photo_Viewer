@@ -12,6 +12,7 @@ import com.botty.photoviewer.adapters.GenericHolder
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.galleryViewer.CacheMetadata
 import com.botty.photoviewer.galleryViewer.GalleryViewActivity
+import com.botty.photoviewer.tools.Tools
 import com.botty.photoviewer.tools.clear
 import com.botty.photoviewer.tools.glide.GlideTools
 import com.bumptech.glide.RequestManager
@@ -19,17 +20,13 @@ import kotlinx.android.synthetic.main.picture_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-@SuppressLint("SimpleDateFormat")
+
 class PicturesAdapter(private val glideManager: RequestManager,
                       private val pictureMetaCache: CacheMetadata,
                       private val picturesList: List<PictureContainer>,
                       private val context: Context) : RecyclerView.Adapter<GenericHolder>() {
 
-    private val dateParser by lazy {
-        SimpleDateFormat("dd MMM yyyy - HH:mm:ss").apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }
-    }
+    private val dateParser = Tools.standardDateParser
 
     override fun getItemCount() = picturesList.size
 

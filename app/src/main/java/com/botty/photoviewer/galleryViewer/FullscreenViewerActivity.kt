@@ -3,6 +3,9 @@ package com.botty.photoviewer.galleryViewer
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.View
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
@@ -16,6 +19,7 @@ import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_fullscreen_viewer.*
 import kotlinx.coroutines.*
+import kotlin.math.absoluteValue
 
 class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
@@ -31,7 +35,6 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     private lateinit var sessionParams: SessionParams
     private lateinit var galleryPath: String
     private val pictures = mutableListOf<PictureContainer>()
-    private val picturesMetaCache by lazy { CacheMetadata(50, pictures) }
     private var currentPicIndex = 0
 
     private val glide by lazy {
@@ -47,11 +50,13 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fullscreen_viewer)
 
+        val picturesMetaCache: CacheMetadata
         try{
             intent.run {
                 galleryPath = getStringExtra(PICTURE_GALLERY_PATH_KEY) ?: throw Exception()
                 sessionParams = getParcelableExtra(SESSION_PARAMS_KEY) ?: throw Exception()
                 pictures.addAll(getParcelableArrayListExtra(PICTURES_LIST_KEY) ?: throw Exception())
+                picturesMetaCache = CacheMetadata(50, pictures)
                 getParcelableArrayListExtra<PictureMetaContainer.ParcelablePair>(METADATA_CACHE_LIST_KEY)?.run {
                     forEach {pictureMetaPair ->
                         picturesMetaCache.put(pictureMetaPair.hash, pictureMetaPair.pictureMetaContainer)
@@ -65,7 +70,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
             return
         }
 
-        picturesAdapter = PicturesAdapter(pictures, glide, this@FullscreenViewerActivity)
+        picturesAdapter = PicturesAdapter(pictures, glide, picturesMetaCache, this@FullscreenViewerActivity)
         viewPagerPicture.offscreenPageLimit = 2
         viewPagerPicture.adapter = picturesAdapter
         viewPagerPicture.currentItem = currentPicIndex
@@ -79,8 +84,32 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
         viewPagerPicture.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {}
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
-            override fun onPageSelected(position: Int) = picturesLoader.startDownload(position)
+            override fun onPageSelected(position: Int) {
+                picturesLoader.startDownload(position)
+                launch {
+                    val view = findCurrentViewAdapter()
+                    picturesAdapter.setPictureInfo(position, view)
+                }
+            }
         })
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
+        if(event?.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_ENTER,
+                KeyEvent.KEYCODE_DPAD_CENTER -> {
+                    picturesAdapter.changePictureVisibility(findCurrentViewAdapter())
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    private fun findCurrentViewAdapter(): View {
+        val viewId = pictures[viewPagerPicture.currentItem].hashCode.absoluteValue
+        return viewPagerPicture.findViewById(viewId)
     }
 
     override fun onBackPressed() {

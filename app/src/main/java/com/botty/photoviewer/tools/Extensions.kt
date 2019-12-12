@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.viewpager.widget.ViewPager
 import com.github.florent37.inlineactivityresult.Result
 import com.github.florent37.inlineactivityresult.kotlin.KotlinActivityResult
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
@@ -30,9 +31,18 @@ fun View.show() {
     this.visibility = View.VISIBLE
 }
 
-fun View.hide() {
-    this.visibility = View.INVISIBLE
+fun View.hide(gone: Boolean = false) {
+    if(gone)
+        this.visibility = View.GONE
+    else
+        this.visibility = View.INVISIBLE
 }
+
+val View.isInvisible: Boolean
+    get() = this.visibility == View.INVISIBLE
+
+val View.isVisible: Boolean
+    get() = this.visibility == View.VISIBLE
 
 fun <T> MutableList<T>.removeLast() {
     if(size >= 1) removeAt(this.size - 1)

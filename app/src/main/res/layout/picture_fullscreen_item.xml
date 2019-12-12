@@ -31,19 +31,17 @@
             android:textSize="20sp"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:maxLines="1"
-            android:text="Picture.webp"/>
+            android:maxLines="1" />
 
         <TextView
             android:id="@+id/textViewPictureDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
+            android:textSize="17sp"
             android:layout_marginTop="5dp"
             android:textStyle="italic"
-            android:maxLines="1"
-            android:text="Picture."/>
+            android:maxLines="1" />
 
     </LinearLayout>
 
