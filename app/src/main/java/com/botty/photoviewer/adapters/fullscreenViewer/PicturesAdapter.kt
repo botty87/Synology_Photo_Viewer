@@ -93,7 +93,7 @@ class PicturesAdapter(
         }
     }
 
-    fun changePictureVisibility(containerView: View) {
+    fun changePictureVisibility(containerView: View /*, playButton: View*/) {
         showPictureInfo = !showPictureInfo
         please {
             animate(containerView.layoutInfo) {
@@ -102,6 +102,16 @@ class PicturesAdapter(
                 else
                     invisible()
             }
+            /*animate(playButton) {
+                if(showPictureInfo) {
+                    playButton.isFocusable = true
+                    visible()
+                }
+                else {
+                    playButton.isFocusable = false
+                    invisible()
+                }
+            }*/
         }.start()
     }
 

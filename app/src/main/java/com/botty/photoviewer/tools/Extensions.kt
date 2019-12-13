@@ -114,6 +114,16 @@ fun Throwable.log() {
 
 fun Any?.isNotNull() = this != null
 
+fun Any?.isNull() = this == null
+
+fun <T> SparseArray<T>.isNotEmpty() = !this.isEmpty()
+
+fun <T> SparseArray<T>.forEach(action: ((item: T?) -> Unit)) {
+    for(i in 0 until this.size()) {
+        action.invoke(this.valueAt(i))
+    }
+}
+
 fun EditText.clear() {
     this.setText("")
 }

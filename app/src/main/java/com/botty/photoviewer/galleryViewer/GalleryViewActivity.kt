@@ -90,7 +90,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                         when(newState) {
                             RecyclerView.SCROLL_STATE_IDLE -> {
-                                startDownloadPictures()
+                                startDownloadPictures(true)
                             }
                         }
                     }
@@ -111,6 +111,8 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                 recyclerViewPictures.setSelectPadding(5, 5, 5, 5)
             }
     }
+
+    var downloadPicturesHandler: Handler? = null
 
     private lateinit var pictureGalleryPath: String
 
@@ -273,7 +275,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             picturesLoader.pictureNotifier.observe(this) { picIndex ->
                 recyclerViewPictures.adapter?.notifyItemChanged(picIndex)
             }
-            startDownloadPictures()
+            startDownloadPictures(false)
         }
         recyclerViewPictures.viewTreeObserver.addOnGlobalLayoutListener(recyclerViewLayoutListener)
     }
@@ -361,15 +363,29 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    fun startDownloadPictures() {
-        val firstPosition =
-            (recyclerViewPictures.layoutManager as GridAutofitLayoutManager)
-                .findFirstCompletelyVisibleItemPosition()
-        val lastPosition =
-            (recyclerViewPictures.layoutManager as GridAutofitLayoutManager)
-                .findLastCompletelyVisibleItemPosition()
+    fun startDownloadPictures(withDelay: Boolean) {
+        downloadPicturesHandler?.removeCallbacksAndMessages(null)
+        downloadPicturesHandler = null
 
-        picturesLoader.startDownload(firstPosition, lastPosition)
+        val runnable = Runnable {
+            val firstPosition =
+                (recyclerViewPictures.layoutManager as GridAutofitLayoutManager)
+                    .findFirstCompletelyVisibleItemPosition()
+            val lastPosition =
+                (recyclerViewPictures.layoutManager as GridAutofitLayoutManager)
+                    .findLastCompletelyVisibleItemPosition()
+
+            picturesLoader.startDownload(firstPosition, lastPosition)
+            downloadPicturesHandler = null
+        }
+
+        if(withDelay) {
+            downloadPicturesHandler = Handler().apply {
+                postDelayed(runnable, 700)
+            }
+        } else {
+            runnable.run()
+        }
     }
 
     override fun onBackPressed() {

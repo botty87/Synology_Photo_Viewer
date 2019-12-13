@@ -1,6 +1,5 @@
 package com.botty.photoviewer.galleryViewer.loader
 
-import android.graphics.drawable.Drawable
 import android.util.SparseArray
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,14 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.botty.photoviewer.data.JobDownloadStatus
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.SessionParams
-import com.botty.photoviewer.tools.isEmpty
-import com.botty.photoviewer.tools.log
-import com.botty.photoviewer.tools.notExists
+import com.botty.photoviewer.tools.*
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.request.FutureTarget
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.transition.Transition
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.io.File
@@ -37,7 +31,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
     }
 
     private var downloadPictureJobs = SparseArray<Job>(preloadSize)
-    private var downloadPictureFutureTarget = SparseArray<FutureTarget<File>>(preloadSize)
+    private var downloadPictureFutureTargets = SparseArray<FutureTarget<File>>(preloadSize)
     private var activeWorkingJob: Job? = null
     @Volatile private var currentDownloadStatus = JobDownloadStatus.NO_WORK
 
@@ -53,6 +47,33 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
         activeWorkingJob = viewModelScope.launch(Dispatchers.Default) {
             Timber.d("$debugTag start download")
             currentDownloadStatus = JobDownloadStatus.CURRENT_PIC
+
+            if(downloadPictureJobs.isNotEmpty()) {
+                val tempDownloadPictureJobs = SparseArray<Job>(downloadPictureJobs.size())
+                for (picIndex in firstIndex..lastIndex) {
+                    downloadPictureJobs[picIndex]?.run {
+                        tempDownloadPictureJobs.append(picIndex, this)
+                        downloadPictureJobs.remove(picIndex)
+                    }
+                }
+                downloadPictureJobs.forEach { job -> job?.cancel() }
+                downloadPictureJobs = tempDownloadPictureJobs
+            }
+
+            if(downloadPictureFutureTargets.isNotEmpty()) {
+                val tempDownloadPictureFutureTargets = SparseArray<FutureTarget<File>>(downloadPictureFutureTargets.size())
+                for (picIndex in firstIndex..lastIndex) {
+                    downloadPictureFutureTargets[picIndex]?.run {
+                        tempDownloadPictureFutureTargets.append(picIndex, this)
+                        downloadPictureFutureTargets.remove(picIndex)
+                    }
+                }
+                downloadPictureFutureTargets.forEach { target ->
+                    target?.cancel(true)
+                    glide.clear(target)
+                }
+                downloadPictureFutureTargets = tempDownloadPictureFutureTargets
+            }
 
             for (picIndex in firstIndex..lastIndex) {
                 if (downloadPictureJobs[picIndex] == null) {
@@ -77,32 +98,12 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
             if (pictures[picIndex].file?.notExists() != false) {
                 val picFullPath =
                     sessionParams.getPicFullPath(galleryPath!!, pictures[picIndex].name)
-
-                /*glide
-                    .asFile()
-                    .load(picFullPath)
-                    .into(object : CustomTarget<File>() {
-                        override fun onLoadCleared(placeholder: Drawable?) {
-                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                        }
-
-                        override fun onResourceReady(
-                            resource: File,
-                            transition: Transition<in File>?
-                        ) {
-                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                        }
-
-                    })*/
-
-                //TODO test
-                delay(5000)
                 glide
                     .asFile()
                     .load(picFullPath)
                     .submit()
                     .apply {
-                        downloadPictureFutureTarget.append(picIndex, this)
+                        downloadPictureFutureTargets.append(picIndex, this)
                     }.get()
                     .let { picFile ->
                         pictures[picIndex].file = picFile
@@ -182,8 +183,8 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
 
     private fun onJobCompletion(jobIndex: Int, firstIndex: Int, lastIndex: Int) {
         downloadPictureJobs.remove(jobIndex)
-        glide.clear(downloadPictureFutureTarget[jobIndex])
-        downloadPictureFutureTarget.remove(jobIndex)
+        glide.clear(downloadPictureFutureTargets[jobIndex])
+        downloadPictureFutureTargets.remove(jobIndex)
         if(downloadPictureJobs.isEmpty()) {
             when(currentDownloadStatus) {
                 JobDownloadStatus.CURRENT_PIC -> {
@@ -207,12 +208,26 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
         if(clearAll) {
             galleryPath = null
         }
+
+        //TODO test!
+        /*for(i in 0 until downloadPictureFutureTargets.size()) {
+            downloadPictureFutureTargets.valueAt(i)?.cancel(true)
+            glide.clear(downloadPictureFutureTargets.valueAt(i))
+        }
         for(i in 0 until downloadPictureJobs.size()) {
             downloadPictureJobs.valueAt(i)?.cancel()
+        }*/
+
+        downloadPictureFutureTargets.forEach { target ->
+            target?.cancel(true)
+            glide.clear(target)
         }
+        downloadPictureFutureTargets.clear()
+        downloadPictureJobs.forEach { job -> job?.cancel() }
         downloadPictureJobs.clear()
     }
 
+    @Suppress("UNCHECKED_CAST")
     class Factory(private val sessionParams: SessionParams,
                   private val glide: RequestManager,
                   private val pictures: List<PictureContainer>,

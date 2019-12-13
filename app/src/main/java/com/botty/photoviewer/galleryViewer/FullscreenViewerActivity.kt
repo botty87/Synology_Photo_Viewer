@@ -3,6 +3,7 @@ package com.botty.photoviewer.galleryViewer
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.view.KeyEvent
 import android.view.View
 import androidx.fragment.app.FragmentActivity
@@ -17,7 +18,9 @@ import com.botty.photoviewer.data.SessionParams
 import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_fullscreen_viewer.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope() {
@@ -35,6 +38,8 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     private lateinit var galleryPath: String
     private val pictures = mutableListOf<PictureContainer>()
     private var currentPicIndex = 0
+
+    private var presentationHandler: Handler? = null
 
     private val glide by lazy {
         Glide.with(this@FullscreenViewerActivity)
@@ -90,6 +95,32 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
                 }
             }
         })
+
+        /*buttonStartPresentation.setOnClickListener {
+            if(presentationHandler.isNull()) {
+                val pauseDrawable = ContextCompat.getDrawable(this, R.drawable.ic_pause_circle_24dp)
+                buttonStartPresentation.setImageDrawable(pauseDrawable)
+                startPresentation()
+            } else {
+                presentationHandler!!.removeCallbacksAndMessages(null)
+                presentationHandler = null
+                val startDrawable = ContextCompat.getDrawable(this, R.drawable.ic_play_circle_24dp)
+                buttonStartPresentation.setImageDrawable(startDrawable)
+            }
+        }*/
+    }
+
+    private fun startPresentation() {
+        presentationHandler = Handler().apply {
+            postDelayed({
+                var nextItem = viewPagerPicture.currentItem + 1
+                if(nextItem == pictures.size) {
+                    nextItem = 0
+                }
+                viewPagerPicture.currentItem = nextItem
+                startPresentation()
+            }, 5000)
+        }
     }
 
     override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
@@ -97,6 +128,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
             when (event.keyCode) {
                 KeyEvent.KEYCODE_ENTER,
                 KeyEvent.KEYCODE_DPAD_CENTER -> {
+                    //picturesAdapter.changePictureVisibility(findPositionViewAdapter()!!, buttonStartPresentation)
                     picturesAdapter.changePictureVisibility(findPositionViewAdapter()!!)
                     return true
                 }
