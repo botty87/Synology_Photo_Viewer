@@ -112,7 +112,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             }
     }
 
-    var downloadPicturesHandler: Handler? = null
+    private var downloadPicturesHandler: Handler? = null
 
     private lateinit var pictureGalleryPath: String
 

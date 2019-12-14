@@ -10,24 +10,16 @@ import androidx.viewpager.widget.PagerAdapter
 import com.botty.photoviewer.R
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
-import com.botty.photoviewer.galleryViewer.CacheMetadata
-import com.botty.photoviewer.tools.*
-import com.botty.photoviewer.tools.AppPreferences.showPictureInfo
 import com.botty.photoviewer.tools.glide.GlideTools
 import com.bumptech.glide.RequestManager
-import com.github.florent37.kotlin.pleaseanimate.please
 import kotlinx.android.synthetic.main.picture_fullscreen_item.view.*
 import kotlin.math.absoluteValue
 
 class PicturesAdapter(
     private val pictures: List<PictureContainer>,
     private val glide: RequestManager,
-    private val picturesMetaCache: CacheMetadata,
     private val context: Context)
     : PagerAdapter() {
-
-    //private val currentInstantiateView = SparseArray<View>(5)
-    private val dateParser = Tools.standardDateParser
 
     override fun isViewFromObject(view: View, `object`: Any) = view == `object`
     override fun getCount() = pictures.size
@@ -64,55 +56,6 @@ class PicturesAdapter(
                 containerView.imageViewPicture.setImageDrawable(prog)
             }
         }
-        setPictureInfo(position, containerView)
-    }
-
-    fun setPictureInfo(pos: Int, containerView: View) {
-        if(showPictureInfo) {
-            containerView.run {
-                val picture = pictures[pos]
-                runCatching {
-                    picturesMetaCache[picture.hashCode]
-                }.onFailure {
-                    textViewPictureDate.hide(true)
-                }.onSuccess { picMetaData ->
-                    textViewPictureDate.text = dateParser.format(picMetaData.originDate)
-                    textViewPictureDate.show()
-                }
-                textViewPictureName.text = picture.name
-                if(layoutInfo.isInvisible){
-                    layoutInfo.show()
-                }
-            }
-        } else {
-            containerView.run {
-                if(layoutInfo.isVisible){
-                    layoutInfo.hide()
-                }
-            }
-        }
-    }
-
-    fun changePictureVisibility(containerView: View /*, playButton: View*/) {
-        showPictureInfo = !showPictureInfo
-        please {
-            animate(containerView.layoutInfo) {
-                if(showPictureInfo)
-                    visible()
-                else
-                    invisible()
-            }
-            /*animate(playButton) {
-                if(showPictureInfo) {
-                    playButton.isFocusable = true
-                    visible()
-                }
-                else {
-                    playButton.isFocusable = false
-                    invisible()
-                }
-            }*/
-        }.start()
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {

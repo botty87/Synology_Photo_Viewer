@@ -3,6 +3,7 @@ package com.botty.photoviewer.tools
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.os.Parcelable
 import android.util.SparseArray
 import android.view.View
@@ -36,12 +37,6 @@ fun View.hide(gone: Boolean = false) {
     else
         this.visibility = View.INVISIBLE
 }
-
-val View.isInvisible: Boolean
-    get() = this.visibility == View.INVISIBLE
-
-val View.isVisible: Boolean
-    get() = this.visibility == View.VISIBLE
 
 fun <T> MutableList<T>.removeLast() {
     if(size >= 1) removeAt(this.size - 1)
@@ -136,3 +131,7 @@ fun <T> SparseArray<T>.isEmpty(): Boolean = this.size() == 0
 fun File.notExists() = !exists()
 
 fun String.endsWithNoCase(suffix: String) = this.endsWith(suffix, true)
+
+fun Handler?.removeAll() {
+    this?.removeCallbacksAndMessages(null)
+}
