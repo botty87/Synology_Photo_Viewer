@@ -399,7 +399,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
     }
 
     override fun onStop() {
-        if(isFinishing) {
+        if(isFinishing && ::sessionParams.isInitialized) {
             LogoutWorker.setWorker(this, sessionParams)
         }
         super.onStop()

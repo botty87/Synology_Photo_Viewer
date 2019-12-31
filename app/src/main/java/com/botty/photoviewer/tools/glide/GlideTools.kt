@@ -48,6 +48,13 @@ object GlideTools {
         }
     }
 
+    fun setErrorImage(glide: RequestManager,
+                      imageView: ImageView) {
+        glide
+            .load(R.drawable.ic_broken_image_220dp)
+            .into(imageView)
+    }
+
     private fun loadImage(glide: RequestManager,
                   imageView: ImageView,
                   pictureContainer: PictureContainer,

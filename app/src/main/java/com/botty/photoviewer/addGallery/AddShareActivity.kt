@@ -183,7 +183,7 @@ class AddShareActivity : FragmentActivity(), CoroutineScope by MainScope() {
             enableButtonSetActualFolder()
             recyclerViewFolders.requestFocus()
         }
-        exception.message?.let { showErrorToast(it) } ?: showErrorToast(R.string.error)
+        exception.localizedMessage?.let { showErrorToast(it) } ?: showErrorToast(R.string.error)
         exception.log()
     }
 

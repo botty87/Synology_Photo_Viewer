@@ -11,6 +11,7 @@ import com.botty.photoviewer.R
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
 import com.botty.photoviewer.tools.glide.GlideTools
+import com.botty.photoviewer.tools.showErrorToast
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_fullscreen_item.view.*
 import kotlin.math.absoluteValue
@@ -34,8 +35,8 @@ class PicturesAdapter(
 
     fun setPicture(position: Int, containerView: View) {
         val picture = pictures[position]
-        if(picture.file?.exists() == true) {
-            if (picture.name.endsWith(".webp", true)) {
+        when {
+            picture.file?.exists() == true -> if (picture.name.endsWith(".webp", true)) {
                 runCatching {
                     PictureMetaContainer.readFromFile(picture.file).rotation
                 }.onSuccess { rotation ->
@@ -46,8 +47,13 @@ class PicturesAdapter(
             } else {
                 GlideTools.loadImageIntoView(glide, containerView.imageViewPicture, picture, context)
             }
-        } else {
-            CircularProgressDrawable(context).apply {
+
+            picture.timeoutException -> {
+                GlideTools.setErrorImage(glide, containerView.imageViewPicture)
+                context.showErrorToast(R.string.timeoutException)
+            }
+
+            else -> CircularProgressDrawable(context).apply {
                 strokeWidth = 5f
                 centerRadius = 30f
                 this.setColorSchemeColors(Color.RED)

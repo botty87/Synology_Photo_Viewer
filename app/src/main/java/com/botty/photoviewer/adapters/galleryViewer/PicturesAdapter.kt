@@ -14,6 +14,7 @@ import com.botty.photoviewer.galleryViewer.CacheMetadata
 import com.botty.photoviewer.tools.Tools
 import com.botty.photoviewer.tools.clear
 import com.botty.photoviewer.tools.glide.GlideTools
+import com.botty.photoviewer.tools.showErrorToast
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_item.view.*
 
@@ -35,35 +36,44 @@ class PicturesAdapter(private val glideManager: RequestManager,
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: GenericHolder, position: Int) {
         val picture = picturesList[holder.adapterPosition]
-        if(picture.file?.exists() == true) {
-            val metaCacheId = picture.hashCode
-            if(picture.name.endsWith(".webp", true)) {
-                runCatching {
-                    pictureMetaCache[metaCacheId].rotation
-                }.onSuccess { rotation ->
-                    GlideTools.loadWebpImageIntoView(glideManager, holder.itemView.imageViewPicture, picture, context, rotation)
-                }.onFailure {
+        when {
+            picture.file?.exists() == true -> {
+                val metaCacheId = picture.hashCode
+                if(picture.name.endsWith(".webp", true)) {
+                    runCatching {
+                        pictureMetaCache[metaCacheId].rotation
+                    }.onSuccess { rotation ->
+                        GlideTools.loadWebpImageIntoView(glideManager, holder.itemView.imageViewPicture, picture, context, rotation)
+                    }.onFailure {
+                        GlideTools.loadImageIntoView(glideManager, holder.itemView.imageViewPicture, picture, context)
+                    }
+                } else {
                     GlideTools.loadImageIntoView(glideManager, holder.itemView.imageViewPicture, picture, context)
                 }
-            } else {
-                GlideTools.loadImageIntoView(glideManager, holder.itemView.imageViewPicture, picture, context)
+
+                runCatching {
+                    pictureMetaCache[metaCacheId].originDate
+                }.onSuccess { picDate ->
+                    holder.itemView.textViewDate.text = dateParser.format(picDate)
+                }
             }
 
-            runCatching {
-                pictureMetaCache[metaCacheId].originDate
-            }.onSuccess { picDate ->
-                holder.itemView.textViewDate.text = dateParser.format(picDate)
+            picture.timeoutException -> {
+                GlideTools.setErrorImage(glideManager, holder.itemView.imageViewPicture)
+                context.showErrorToast(R.string.timeoutException)
             }
-        } else {
-            CircularProgressDrawable(context).apply {
-                strokeWidth = 5f
-                centerRadius = 30f
-                this.setColorSchemeColors(Color.RED)
-                start()
-            }.let {prog ->
-                holder.itemView.imageViewPicture.setImageDrawable(prog)
+
+            else -> {
+                CircularProgressDrawable(context).apply {
+                    strokeWidth = 5f
+                    centerRadius = 30f
+                    this.setColorSchemeColors(Color.RED)
+                    start()
+                }.let {prog ->
+                    holder.itemView.imageViewPicture.setImageDrawable(prog)
+                }
+                picturesList[holder.adapterPosition].file = null
             }
-            picturesList[holder.adapterPosition].file = null
         }
 
         holder.itemView.textViewName.text = picture.name

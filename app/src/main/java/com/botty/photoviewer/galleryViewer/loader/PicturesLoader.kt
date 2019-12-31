@@ -13,6 +13,7 @@ import com.bumptech.glide.request.FutureTarget
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.io.File
+import java.util.concurrent.ExecutionException
 
 class PicturesLoader private constructor(private val sessionParams: SessionParams,
                                          private val glide: RequestManager,
@@ -113,6 +114,13 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
             }
         } catch (e: NullPointerException) {
             e.log()
+        } catch (e: ExecutionException) {
+            e.log()
+            pictures[picIndex].run {
+                file = null
+                timeoutException = true
+            }
+            pictureNotifier.postValue(picIndex)
         }
     }
 
@@ -208,15 +216,6 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
         if(clearAll) {
             galleryPath = null
         }
-
-        //TODO test!
-        /*for(i in 0 until downloadPictureFutureTargets.size()) {
-            downloadPictureFutureTargets.valueAt(i)?.cancel(true)
-            glide.clear(downloadPictureFutureTargets.valueAt(i))
-        }
-        for(i in 0 until downloadPictureJobs.size()) {
-            downloadPictureJobs.valueAt(i)?.cancel()
-        }*/
 
         downloadPictureFutureTargets.forEach { target ->
             target?.cancel(true)

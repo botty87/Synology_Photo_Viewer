@@ -4,7 +4,8 @@ import android.os.Parcel
 import android.os.Parcelable
 import java.io.File
 
-data class PictureContainer(val name: String, val hashCode: Int, var file: File? = null) :
+data class PictureContainer(val name: String, val hashCode: Int, var file: File? = null,
+                            var timeoutException: Boolean = false) :
     Parcelable {
 
     constructor(parcel: Parcel) : this(
