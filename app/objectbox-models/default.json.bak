@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:692227462177343660",
-      "lastPropertyId": "8:5472007276549612993",
+      "lastPropertyId": "11:3557775019959873348",
       "name": "Gallery",
       "properties": [
         {
@@ -37,13 +37,18 @@
           "name": "headerToSet",
           "type": 1,
           "flags": 4
+        },
+        {
+          "id": "9:1733589613994800955",
+          "name": "lastSync",
+          "type": 10
         }
       ],
       "relations": []
     },
     {
       "id": "2:1004299832487457156",
-      "lastPropertyId": "9:2997849584057875355",
+      "lastPropertyId": "11:5547587914337866465",
       "name": "ConnectionParams",
       "properties": [
         {
@@ -68,16 +73,77 @@
           "type": 9
         },
         {
-          "id": "7:3066029208325206419",
-          "name": "lastSave",
-          "type": 10
+          "id": "10:4375482724838652616",
+          "name": "port",
+          "type": 5,
+          "flags": 4
+        },
+        {
+          "id": "11:5547587914337866465",
+          "name": "https",
+          "type": 1,
+          "flags": 4
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:5630359728454909712",
+      "lastPropertyId": "3:4599768247591440531",
+      "name": "MediaFile",
+      "properties": [
+        {
+          "id": "1:3407682579785604705",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:303732484148298092",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:4599768247591440531",
+          "name": "folderId",
+          "indexId": "5:4170599760917449455",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "MediaFolder"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:9181247289377532722",
+      "lastPropertyId": "4:3567757670548555736",
+      "name": "MediaFolder",
+      "properties": [
+        {
+          "id": "1:6470887196260072406",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2385501553240955609",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:3567757670548555736",
+          "name": "parentFolderId",
+          "indexId": "7:6370292708100389606",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "MediaFolder"
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:1004299832487457156",
-  "lastIndexId": "3:2327584762237749589",
+  "lastEntityId": "4:9181247289377532722",
+  "lastIndexId": "8:4683037588652055051",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
@@ -85,7 +151,10 @@
   "retiredEntityUids": [],
   "retiredIndexUids": [
     4729535733504229364,
-    6152529289037080809
+    6152529289037080809,
+    7592591533950047452,
+    2601924439369720490,
+    4683037588652055051
   ],
   "retiredPropertyUids": [
     2856273561805516046,
@@ -94,7 +163,11 @@
     2284473903046128393,
     4214125957605214606,
     4606765497324401725,
-    2997849584057875355
+    2997849584057875355,
+    3066029208325206419,
+    364979577528867442,
+    4950054308079683520,
+    3557775019959873348
   ],
   "retiredRelationUids": [],
   "version": 1

@@ -293,7 +293,8 @@ class AddShareActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private fun addGalleryAndClose(galleryName: String) {
         val path = "/".concat(actualPath)
-        val gallery = Gallery(galleryName, path)
+        val gallery =
+            Gallery(galleryName, path)
         if(connectionParams.id != 0L) {
             gallery.connectionParams.targetId = connectionParams.id
         } else {

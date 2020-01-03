@@ -2,8 +2,8 @@ package com.botty.photoviewer.main
 
 import androidx.lifecycle.ViewModel
 import com.botty.photoviewer.data.Gallery
-import com.botty.photoviewer.data.Gallery_
 import com.botty.photoviewer.data.ObjectBox
+import com.botty.photoviewer.data.Gallery_
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.query
 

@@ -9,6 +9,7 @@ import com.botty.photoviewer.adapters.main.GalleriesAdapter
 import com.botty.photoviewer.addGallery.AddShareActivity
 import com.botty.photoviewer.data.Gallery
 import com.botty.photoviewer.galleryViewer.GalleryViewActivity
+import com.botty.photoviewer.settings.SettingsActivity
 import com.botty.photoviewer.tools.GridAutofitLayoutManager
 import com.botty.photoviewer.tools.network.Network
 import com.botty.photoviewer.tools.startActivity
@@ -23,6 +24,7 @@ class MainActivity : FragmentActivity() {
         GalleriesAdapter(Glide.with(this)).apply {
             onAddNewClick = this@MainActivity::onAddNewClick
             onGalleryClick = this@MainActivity::onGalleryClick
+            onSettingsClick = this@MainActivity::onSettingsClick
 
             val width = resources.getDimension(R.dimen.gallery_width).toInt()
             recyclerViewGalleries.layoutManager = GridAutofitLayoutManager(this@MainActivity, width)
@@ -45,6 +47,10 @@ class MainActivity : FragmentActivity() {
 
     private fun onAddNewClick() {
         startActivity<AddShareActivity>()
+    }
+
+    private fun onSettingsClick() {
+        startActivity<SettingsActivity>()
     }
 
     private fun onGalleryClick(gallery: Gallery) {

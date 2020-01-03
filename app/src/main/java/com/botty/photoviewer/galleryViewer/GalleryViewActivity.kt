@@ -16,6 +16,7 @@ import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.galleryViewer.FoldersAdapter
 import com.botty.photoviewer.adapters.galleryViewer.PicturesAdapter
 import com.botty.photoviewer.data.*
+import com.botty.photoviewer.data.Gallery
 import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
 import com.botty.photoviewer.tools.*
 import com.botty.photoviewer.tools.network.Network
@@ -157,7 +158,8 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                     Network.login(conParams)
                 }.onSuccess { response ->
                     sessionParams = conParams.toSessionParams(response.sid)
-                    loadFolder(gallery.path)
+                    //oldLoadFolder(gallery.path)
+                    loadPictures()
                 }.onFailure { e ->
                     e.log()
                     showErrorToast("${e.localizedMessage} ${getString(R.string.con_params_changed_error)}", Toasty.LENGTH_LONG)
@@ -167,7 +169,39 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun loadFolder(path: String, nameToAdd: String? = null) {
+    private fun loadPictures() {
+        /*if(!gallery.mainFolder.isResolvedAndNotNull) {
+            gallery.mainFolder.target = MediaFolder(name = gallery.name)
+            ObjectBox.galleryBox.put(gallery)
+        }
+
+        suspend fun fillDB(shares: List<Share>) = withContext(Dispatchers.IO) {
+            shares.forEach { share ->
+                if(share.isNotHidden()) {
+                    if (share.isdir) {
+                        gallery.mainFolder.target.childFolders.add(MediaFolder(name = share.name))
+                    } else if (share.isPicture()) {
+                        gallery.mainFolder.target.childFiles.add(MediaFile(name = share.name))
+                    }
+                }
+            }
+            ObjectBox.galleryBox.put(gallery)
+        }
+
+        launch {
+            runCatching {
+                Network.getFoldersContent(sessionParams, gallery.path)
+            }.onSuccess { response ->
+                fillDB(response.files)
+            }.onFailure { e ->
+                //TODO manage better!
+                e.log()
+                showErrorToast(e.localizedMessage ?: getString(R.string.error))
+            }
+        }*/
+    }
+
+    private fun oldLoadFolder(path: String, nameToAdd: String? = null) {
         fun showLoader() {
             isLoadingFolder = true
             recyclerViewFolders.hide()
@@ -188,14 +222,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             recyclerViewPictures.show()
             textViewAlbumNameTitle.show()
         }
-
-        fun Share.isPicture(): Boolean = name.endsWithNoCase(".webp") ||
-                name.endsWithNoCase(".jpg") ||
-                name.endsWithNoCase(".jpeg") ||
-                name.endsWithNoCase(".png") ||
-                name.endsWithNoCase(".tif") ||
-                name.endsWithNoCase(".tiff") ||
-                name.endsWithNoCase(".gif")
 
         launch {
             runCatching {
@@ -281,19 +307,19 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
     }
 
     private fun onFolderClick(folder: Share) {
-        loadFolder(folder.path, folder.name)
+        oldLoadFolder(folder.path, folder.name)
     }
 
     private fun onParentClick() {
         if(actualPath.size <= 1) {
-            loadFolder(gallery.path)
+            oldLoadFolder(gallery.path)
         } else {
             var path = "${gallery.path}/"
             for(i in 0 until actualPath.size - 1) {
                 path += "${actualPath[i]}/"
             }
             path = path.dropLast(1)
-            loadFolder(path)
+            oldLoadFolder(path)
         }
     }
 

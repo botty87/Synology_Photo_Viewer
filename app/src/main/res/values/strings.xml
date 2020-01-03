@@ -29,4 +29,7 @@
     <string name="album">Album</string>
     <string name="loading">Loading…</string>
     <string name="timeoutException">Timeout exception</string>
+    <string name="daily_update_message">Daily auto-update your galleries collection</string>
+    <string name="show_subfolders_message">Show all the sub-folders pictures</string>
+    <string name="settings">Settings</string>
 </resources>

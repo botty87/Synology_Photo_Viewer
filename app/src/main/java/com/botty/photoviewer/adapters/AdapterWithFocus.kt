@@ -29,11 +29,15 @@ abstract class AdapterWithFocus<VH : RecyclerView.ViewHolder>(private val animat
             }
 
         } else {
-            val kenBurnsView = (firstChild as ViewGroup).getChildAt(0) as KenBurnsView
-            if (start) {
-                kenBurnsView.resume()
-            } else {
-                kenBurnsView.pause()
+            if(firstChild is ViewGroup) {
+                val kenBurnsView = firstChild.getChildAt(0)
+                if (kenBurnsView is KenBurnsView) {
+                    if (start) {
+                        kenBurnsView.resume()
+                    } else {
+                        kenBurnsView.pause()
+                    }
+                }
             }
         }
     }
