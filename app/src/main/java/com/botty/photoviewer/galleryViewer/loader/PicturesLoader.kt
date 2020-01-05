@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.botty.photoviewer.data.JobDownloadStatus
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.SessionParams
+import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.tools.*
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.request.FutureTarget
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutionException
 
 class PicturesLoader private constructor(private val sessionParams: SessionParams,
                                          private val glide: RequestManager,
-                                         private val pictures: List<PictureContainer>,
+                                         private val pictures: List<MediaFile>,
                                          private val preloadSize: Int) : ViewModel() {
 
     val pictureNotifier = PictureNotifier()
@@ -229,7 +230,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
     @Suppress("UNCHECKED_CAST")
     class Factory(private val sessionParams: SessionParams,
                   private val glide: RequestManager,
-                  private val pictures: List<PictureContainer>,
+                  private val pictures: List<MediaFile>,
                   private val preloadSize: Int): ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return PicturesLoader(sessionParams, glide, pictures, preloadSize) as T

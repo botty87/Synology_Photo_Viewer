@@ -28,5 +28,5 @@ data class PictureMetaContainer(val originDate: Date, val rotation: Int) : Parce
     class NoMetadataException: Exception()
 
     @Parcelize
-    data class ParcelablePair(val hash: Int, val pictureMetaContainer: PictureMetaContainer) : Parcelable
+    data class ParcelablePair(val id: Long, val pictureMetaContainer: PictureMetaContainer) : Parcelable
 }

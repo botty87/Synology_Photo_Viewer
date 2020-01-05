@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
+import com.botty.photoviewer.data.fileStructure.MediaFolder
 import com.botty.photoviewer.tools.isNotNull
 import com.botty.photoviewer.tools.network.responses.containers.Share
 import kotlinx.android.synthetic.main.gallery_folder_item.view.*
@@ -16,7 +17,7 @@ class FoldersAdapter: RecyclerView.Adapter<GenericHolder>() {
         private const val BACK_TYPE = 2
     }
 
-    var folders = emptyList<Share>()
+    var folders = emptyList<MediaFolder>()
     private set
     var parentName: String? = null
     private set
@@ -56,7 +57,7 @@ class FoldersAdapter: RecyclerView.Adapter<GenericHolder>() {
         }
     }
 
-    fun setFolders(folders: List<Share>, parentName: String? = null) {
+    fun setFolders(folders: List<MediaFolder>, parentName: String? = null) {
         this.folders = folders
         this.parentName = parentName
         notifyDataSetChanged()

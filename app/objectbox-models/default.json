@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:692227462177343660",
-      "lastPropertyId": "11:3557775019959873348",
+      "lastPropertyId": "12:4729490875592671422",
       "name": "Gallery",
       "properties": [
         {
@@ -39,9 +39,12 @@
           "flags": 4
         },
         {
-          "id": "9:1733589613994800955",
-          "name": "lastSync",
-          "type": 10
+          "id": "12:4729490875592671422",
+          "name": "folderId",
+          "indexId": "11:817448962384939712",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "MediaFolder"
         }
       ],
       "relations": []
@@ -86,11 +89,65 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "5:3026746684346995905",
+      "lastPropertyId": "4:5752718284983206324",
+      "name": "MediaFolder",
+      "properties": [
+        {
+          "id": "1:3166395944701313416",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2428882197819520306",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:5752718284983206324",
+          "name": "parentFolderId",
+          "indexId": "12:3980411320263521874",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "MediaFolder"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "6:8758153863059344589",
+      "lastPropertyId": "4:3336067345256649095",
+      "name": "MediaFile",
+      "properties": [
+        {
+          "id": "1:3767795418652853714",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7228750238635367461",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:2266602988758964630",
+          "name": "folderId",
+          "indexId": "10:7480185112561212282",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "MediaFolder"
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "4:9181247289377532722",
-  "lastIndexId": "8:4683037588652055051",
-  "lastRelationId": "0:0",
+  "lastEntityId": "6:8758153863059344589",
+  "lastIndexId": "12:3980411320263521874",
+  "lastRelationId": "2:669667728775646517",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
@@ -105,7 +162,8 @@
     2601924439369720490,
     4683037588652055051,
     6370292708100389606,
-    4170599760917449455
+    4170599760917449455,
+    4112118329646605643
   ],
   "retiredPropertyUids": [
     2856273561805516046,
@@ -124,8 +182,14 @@
     3567757670548555736,
     3407682579785604705,
     303732484148298092,
-    4599768247591440531
+    4599768247591440531,
+    1733589613994800955,
+    5031962233408981926,
+    3336067345256649095
   ],
-  "retiredRelationUids": [],
+  "retiredRelationUids": [
+    669667728775646517,
+    6713046038173095997
+  ],
   "version": 1
 }

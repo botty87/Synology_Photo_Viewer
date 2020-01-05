@@ -1,5 +1,6 @@
 package com.botty.photoviewer.addGallery
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.FragmentActivity
@@ -301,6 +302,7 @@ class AddShareActivity : FragmentActivity(), CoroutineScope by MainScope() {
             gallery.connectionParams.target = connectionParams
         }
         ObjectBox.galleryBox.put(gallery)
+        setResult(Activity.RESULT_OK)
         finish()
     }
 }

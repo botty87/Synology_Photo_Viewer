@@ -10,6 +10,7 @@ import androidx.viewpager.widget.PagerAdapter
 import com.botty.photoviewer.R
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
+import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.tools.glide.GlideTools
 import com.botty.photoviewer.tools.showErrorToast
 import com.bumptech.glide.RequestManager
@@ -17,7 +18,7 @@ import kotlinx.android.synthetic.main.picture_fullscreen_item.view.*
 import kotlin.math.absoluteValue
 
 class PicturesAdapter(
-    private val pictures: List<PictureContainer>,
+    private val pictures: List<MediaFile>,
     private val glide: RequestManager,
     private val context: Context)
     : PagerAdapter() {
@@ -28,7 +29,7 @@ class PicturesAdapter(
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val view = LayoutInflater.from(context).inflate(R.layout.picture_fullscreen_item, container, false)
         setPicture(position, view)
-        view.id = pictures[position].hashCode.absoluteValue
+        view.id = pictures[position].id.toInt()
         container.addView(view)
         return view
     }

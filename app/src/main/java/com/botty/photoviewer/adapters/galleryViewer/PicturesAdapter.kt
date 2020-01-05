@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
-import com.botty.photoviewer.data.PictureContainer
+import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.galleryViewer.CacheMetadata
 import com.botty.photoviewer.tools.Tools
 import com.botty.photoviewer.tools.clear
@@ -21,7 +21,7 @@ import kotlinx.android.synthetic.main.picture_item.view.*
 
 class PicturesAdapter(private val glideManager: RequestManager,
                       private val pictureMetaCache: CacheMetadata,
-                      private val picturesList: List<PictureContainer>,
+                      private val picturesList: List<MediaFile>,
                       private val context: Context) : RecyclerView.Adapter<GenericHolder>() {
 
     private val dateParser = Tools.standardDateParser
@@ -38,10 +38,9 @@ class PicturesAdapter(private val glideManager: RequestManager,
         val picture = picturesList[holder.adapterPosition]
         when {
             picture.file?.exists() == true -> {
-                val metaCacheId = picture.hashCode
                 if(picture.name.endsWith(".webp", true)) {
                     runCatching {
-                        pictureMetaCache[metaCacheId].rotation
+                        pictureMetaCache[picture.id].rotation
                     }.onSuccess { rotation ->
                         GlideTools.loadWebpImageIntoView(glideManager, holder.itemView.imageViewPicture, picture, context, rotation)
                     }.onFailure {
@@ -52,7 +51,7 @@ class PicturesAdapter(private val glideManager: RequestManager,
                 }
 
                 runCatching {
-                    pictureMetaCache[metaCacheId].originDate
+                    pictureMetaCache[picture.id].originDate
                 }.onSuccess { picDate ->
                     holder.itemView.textViewDate.text = dateParser.format(picDate)
                 }
@@ -79,7 +78,7 @@ class PicturesAdapter(private val glideManager: RequestManager,
         holder.itemView.textViewName.text = picture.name
     }
 
-    override fun getItemId(position: Int): Long = picturesList[position].hashCode.toLong()
+    override fun getItemId(position: Int): Long = picturesList[position].id
 
     override fun onViewRecycled(holder: GenericHolder) {
         glideManager.clear(holder.itemView.imageViewPicture)

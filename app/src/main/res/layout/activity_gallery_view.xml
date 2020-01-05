@@ -27,7 +27,6 @@
             android:focusable="true"
             android:layout_marginBottom="5dp"
             android:scrollbars="none"
-            android:visibility="invisible"
             app:scrollMode="followScroll"
             app:focusScale="1"
             app:focusDrawable="@drawable/folders_background"
@@ -76,7 +75,6 @@
         android:id="@+id/recyclerViewPictures"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
         android:focusable="true"
         android:nextFocusLeft="@id/recyclerViewFolders"
         app:focusScale="1"
@@ -88,16 +86,5 @@
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         android:clipToPadding="false"/>
-
-    <ProgressBar
-        android:id="@+id/progressPicturesLoader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleLarge"
-        android:visibility="visible"
-        app:layout_constraintTop_toTopOf="@id/recyclerViewPictures"
-        app:layout_constraintBottom_toBottomOf="@id/recyclerViewPictures"
-        app:layout_constraintLeft_toLeftOf="@id/recyclerViewPictures"
-        app:layout_constraintRight_toRightOf="@id/recyclerViewPictures"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

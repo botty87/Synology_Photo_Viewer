@@ -15,13 +15,17 @@ import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.fullscreenViewer.PicturesAdapter
+import com.botty.photoviewer.data.ObjectBox
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
 import com.botty.photoviewer.data.SessionParams
+import com.botty.photoviewer.data.fileStructure.MediaFile
+import com.botty.photoviewer.data.fileStructure.MediaFile_
 import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
 import com.botty.photoviewer.tools.*
 import com.bumptech.glide.Glide
 import com.github.florent37.kotlin.pleaseanimate.please
+import io.objectbox.kotlin.query
 import kotlinx.android.synthetic.main.activity_fullscreen_viewer.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -33,7 +37,7 @@ private const val INFO_DELAY = 3000L
 class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     companion object {
-        const val PICTURES_LIST_KEY = "pic_list"
+        const val FOLDER_ID_KEY = "folder_id"
         const val METADATA_CACHE_LIST_KEY = "meta_cache"
         const val CURRENT_PICTURE_KEY = "cur_pic"
         const val PICTURE_GALLERY_PATH_KEY = "pic_gallery_path"
@@ -44,7 +48,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     private lateinit var sessionParams: SessionParams
     private lateinit var galleryPath: String
     private lateinit var picturesMetaCache: CacheMetadata
-    private val pictures = mutableListOf<PictureContainer>()
+    private lateinit var pictures: List<MediaFile>
     private var currentPicIndex = 0
 
     private var presentationHandler: Handler? = null
@@ -57,7 +61,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     private val picturesLoader by lazy {
         ViewModelProvider(this,
             PicturesLoader.Factory(sessionParams, glide, pictures,5))
-            .get(PicturesLoader::class.java)
+                .get(PicturesLoader::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,10 +72,19 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
             intent.run {
                 galleryPath = getStringExtra(PICTURE_GALLERY_PATH_KEY) ?: throw Exception()
                 sessionParams = getParcelableExtra(SESSION_PARAMS_KEY) ?: throw Exception()
-                pictures.addAll(getParcelableArrayListExtra(PICTURES_LIST_KEY) ?: throw Exception())
+                val folderId = getLongExtra(FOLDER_ID_KEY, 0L)
+                if(folderId == 0L) {
+                    finish()
+                    return
+                }
+
+                pictures = ObjectBox.mediaFileBox.query {
+                    equal(MediaFile_.folderId, folderId)
+                }.find()
+
                 picturesMetaCache = CacheMetadata(50, pictures)
                 getParcelableArrayListExtra<PictureMetaContainer.ParcelablePair>(METADATA_CACHE_LIST_KEY)?.forEach { pictureMetaPair ->
-                    picturesMetaCache.put(pictureMetaPair.hash, pictureMetaPair.pictureMetaContainer)
+                    picturesMetaCache.put(pictureMetaPair.id, pictureMetaPair.pictureMetaContainer)
                 } ?: throw Exception()
                 currentPicIndex = getIntExtra(CURRENT_PICTURE_KEY, 0)
                 picturesLoader.setNewGalleryPath(galleryPath)
@@ -185,7 +198,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
         cleanInfoHandler()
         val picture = pictures[pos]
         runCatching {
-            picturesMetaCache[picture.hashCode]
+            picturesMetaCache[picture.id]
         }.onFailure {
             textViewPictureDate.hide(true)
         }.onSuccess { picMetaData ->
@@ -239,7 +252,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     }
 
     private fun findChildViewAdapter(pos: Int = viewPagerPicture.currentItem): View? {
-        val viewId = pictures[pos].hashCode.absoluteValue
+        val viewId = pictures[pos].id.toInt()
         return viewPagerPicture.findViewById(viewId)
     }
 
