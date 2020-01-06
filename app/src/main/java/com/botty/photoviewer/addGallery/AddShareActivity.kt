@@ -1,6 +1,7 @@
 package com.botty.photoviewer.addGallery
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.FragmentActivity
@@ -301,8 +302,10 @@ class AddShareActivity : FragmentActivity(), CoroutineScope by MainScope() {
         } else {
             gallery.connectionParams.target = connectionParams
         }
-        ObjectBox.galleryBox.put(gallery)
-        setResult(Activity.RESULT_OK)
+        val galleryId = ObjectBox.galleryBox.put(gallery)
+        val intent = Intent()
+        intent.putExtra(Gallery.ID_TAG, galleryId)
+        setResult(Activity.RESULT_OK, intent)
         finish()
     }
 }

@@ -92,7 +92,7 @@
     },
     {
       "id": "5:3026746684346995905",
-      "lastPropertyId": "4:5752718284983206324",
+      "lastPropertyId": "5:188311699435377756",
       "name": "MediaFolder",
       "properties": [
         {
@@ -113,13 +113,19 @@
           "type": 11,
           "flags": 1548,
           "relationTarget": "MediaFolder"
+        },
+        {
+          "id": "5:188311699435377756",
+          "name": "galleryId",
+          "type": 6,
+          "flags": 4
         }
       ],
       "relations": []
     },
     {
       "id": "6:8758153863059344589",
-      "lastPropertyId": "4:3336067345256649095",
+      "lastPropertyId": "5:7889384060086763561",
       "name": "MediaFile",
       "properties": [
         {
@@ -142,9 +148,9 @@
           "relationTarget": "MediaFolder"
         },
         {
-          "id": "4:3336067345256649095",
-          "name": "hashCode",
-          "type": 5,
+          "id": "5:7889384060086763561",
+          "name": "galleryId",
+          "type": 6,
           "flags": 4
         }
       ],
@@ -190,7 +196,8 @@
     303732484148298092,
     4599768247591440531,
     1733589613994800955,
-    5031962233408981926
+    5031962233408981926,
+    3336067345256649095
   ],
   "retiredRelationUids": [
     669667728775646517,

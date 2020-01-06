@@ -38,4 +38,7 @@
     <string name="scan_error">Scan error</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="gallery_scan">Gallery scan</string>
+    <string name="do_you_want_scan">Do you want to scan</string>
+    <string name="and_all_subfolders">and all the sub-folders</string>
 </resources>

@@ -92,7 +92,7 @@
     },
     {
       "id": "5:3026746684346995905",
-      "lastPropertyId": "4:5752718284983206324",
+      "lastPropertyId": "5:188311699435377756",
       "name": "MediaFolder",
       "properties": [
         {
@@ -113,13 +113,20 @@
           "type": 11,
           "flags": 1548,
           "relationTarget": "MediaFolder"
+        },
+        {
+          "id": "5:188311699435377756",
+          "name": "galleryId",
+          "indexId": "13:924893983388012851",
+          "type": 6,
+          "flags": 12
         }
       ],
       "relations": []
     },
     {
       "id": "6:8758153863059344589",
-      "lastPropertyId": "4:3336067345256649095",
+      "lastPropertyId": "5:7889384060086763561",
       "name": "MediaFile",
       "properties": [
         {
@@ -140,13 +147,20 @@
           "type": 11,
           "flags": 1548,
           "relationTarget": "MediaFolder"
+        },
+        {
+          "id": "5:7889384060086763561",
+          "name": "galleryId",
+          "indexId": "14:681280016609658002",
+          "type": 6,
+          "flags": 12
         }
       ],
       "relations": []
     }
   ],
   "lastEntityId": "6:8758153863059344589",
-  "lastIndexId": "12:3980411320263521874",
+  "lastIndexId": "14:681280016609658002",
   "lastRelationId": "2:669667728775646517",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

@@ -42,37 +42,30 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         loadGalleries()
+        checkGalleriesScan()
+    }
+
+    private fun checkGalleriesScan() {
+        WorkManager.getInstance(this).getWorkInfosForUniqueWorkLiveData(ScanGalleriesWorker.TAG)
+            .observe(this) { worksInfo ->
+                if(!worksInfo.isEmpty()) {
+
+                }
+            }
 
         if(ScanGalleriesPref.isFirstSyncNeeded) {
             scanGalleries()
         }
     }
 
-    private fun scanGalleries() {
+    private fun scanGalleries(galleryId: Long = 0) {
         layoutProgressLoader.show()
-        val workID = ScanGalleriesWorker.setWorker(this)
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(workID)
-            .observe(this) { workInfo: WorkInfo? ->
-                when (workInfo?.state) {
-                    WorkInfo.State.SUCCEEDED, WorkInfo.State.FAILED -> {
-                        layoutProgressLoader.hide(true)
-                        if(workInfo.state == WorkInfo.State.SUCCEEDED) {
-                            showSuccessToast(R.string.scan_completed, Toasty.LENGTH_LONG)
-                        } else {
-                            var errorMessage = workInfo.outputData.getString(ScanGalleriesWorker.ERROR_KEY)
-                            errorMessage = "${getString(R.string.scan_error)}: $errorMessage\n${getString(R.string.retry_scan)}"
-                            MaterialDialog(this).show {
-                                title(R.string.error)
-                                message(text = errorMessage)
-                                positiveButton(R.string.yes) {
-                                    scanGalleries()
-                                }
-                                negativeButton(R.string.no)
-                            }
-                        }
-                    }
-                }
+        Tools.scanGalleries(this, galleryId) { success ->
+            layoutProgressLoader.hide(true)
+            if(success) {
+                showSuccessToast(R.string.scan_completed, Toasty.LENGTH_LONG)
             }
+        }
     }
 
     private fun loadGalleries() {
@@ -84,6 +77,8 @@ class MainActivity : FragmentActivity() {
             startActivityForResult<AddShareActivity> { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     loadGalleries()
+                    val galleryId = result.data?.getLongExtra(Gallery.ID_TAG, 0) ?: 0
+                    scanGalleries(galleryId)
                 }
             }
         }

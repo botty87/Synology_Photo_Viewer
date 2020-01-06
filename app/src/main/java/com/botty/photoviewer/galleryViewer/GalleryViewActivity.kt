@@ -12,6 +12,7 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.afollestad.materialdialogs.MaterialDialog
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.galleryViewer.FoldersAdapter
 import com.botty.photoviewer.adapters.galleryViewer.PicturesAdapter
@@ -167,6 +168,22 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }.now()
         gallery = ObjectBox.galleryBox[galleryId]
         performLogin()
+        buttonSync.setOnClickListener {
+            onSyncGalleryClick()
+        }
+
+        fun enableViews(isEnabled: Boolean) {
+            recyclerViewFolders.isEnabled = isEnabled
+            recyclerViewPictures.isEnabled = isEnabled
+            buttonSync.isEnabled = isEnabled
+            if(isEnabled) {
+                layoutProgressLoader.hide(true)
+            } else {
+                layoutProgressLoader.show()
+            }
+        }
+
+        enableViews(false)
 
         //setAlbumDetails()
     }
@@ -182,6 +199,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                     sessionParams = conParams.toSessionParams(response.sid)
                     textViewAlbumNameTitle.show()
                     textViewAlbumName.clear()
+                    buttonSync.show()
                     currentFolder = gallery.folder.target
                     loadFoldersAndPictures(NavDirection.NONE)
                 }.onFailure { e ->
@@ -224,8 +242,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             val newPictures = async(Dispatchers.IO) {
                 currentFolder.childFiles
             }
-
-
 
             pictures.clear()
             pictures.addAll(newPictures.await())
@@ -426,7 +442,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    fun startDownloadPictures(withDelay: Boolean) {
+    private fun startDownloadPictures(withDelay: Boolean) {
         downloadPicturesHandler?.removeCallbacksAndMessages(null)
         downloadPicturesHandler = null
 
@@ -448,6 +464,40 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             }
         } else {
             runnable.run()
+        }
+    }
+
+    private fun onSyncGalleryClick() {
+        fun startSync() {
+            fun enableViews(isEnabled: Boolean) {
+                recyclerViewFolders.isEnabled = isEnabled
+                recyclerViewPictures.isEnabled = isEnabled
+                buttonSync.isEnabled = isEnabled
+                if(isEnabled) {
+                    layoutProgressLoader.hide(true)
+                } else {
+                    layoutProgressLoader.show()
+                }
+            }
+
+            enableViews(false)
+            Tools.scanGalleries(this, gallery.id) { success ->
+                enableViews(true)
+                if(success) {
+                    showSuccessToast(R.string.scan_completed, Toasty.LENGTH_LONG)
+                    loadFoldersAndPictures(NavDirection.NONE)
+                }
+            }
+        }
+
+        val message = "${getString(R.string.do_you_want_scan)} ${currentFolder.name} ${getString(R.string.and_all_subfolders)}?"
+        MaterialDialog(this).show {
+            title(R.string.gallery_scan)
+            message(text = message)
+            positiveButton(R.string.yes) {
+                startSync()
+            }
+            negativeButton(R.string.no)
         }
     }
 

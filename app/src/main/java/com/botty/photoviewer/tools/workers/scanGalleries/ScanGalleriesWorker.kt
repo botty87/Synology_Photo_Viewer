@@ -5,10 +5,13 @@ import androidx.work.*
 import com.botty.photoviewer.data.ObjectBox
 import com.botty.photoviewer.data.SessionParams
 import com.botty.photoviewer.data.fileStructure.MediaFile
+import com.botty.photoviewer.data.fileStructure.MediaFile_
 import com.botty.photoviewer.data.fileStructure.MediaFolder
+import com.botty.photoviewer.data.fileStructure.MediaFolder_
 import com.botty.photoviewer.tools.log
 import com.botty.photoviewer.tools.network.Network
 import com.botty.photoviewer.tools.network.responses.containers.Share
+import io.objectbox.kotlin.query
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.util.*
@@ -17,21 +20,38 @@ import java.util.concurrent.TimeUnit
 class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        if(ScanGalleriesPref.isGalleryOpened) {
+        val dailySync = inputData.getBoolean(DAILY_SYNC_TAG, false)
+        if(ScanGalleriesPref.isGalleryOpened && dailySync) {
             return@withContext Result.retry()
         }
 
         ScanGalleriesPref.isSyncingGalleries = true
 
-        ObjectBox.mediaFileBox.removeAll()
-        ObjectBox.mediaFolderBox.removeAll()
-        val galleries = ObjectBox.galleryBox.all
+        val galleryId = inputData.getLong(GALLERY_ID, 0L)
+        val folderId = inputData.getLong(FOLDER_ID, 0L)
+
+        val mediaFileBox = ObjectBox.mediaFileBox
+        val mediaFolderBox = ObjectBox.mediaFolderBox
+
+        val galleries = if(galleryId == 0L)
+            ObjectBox.galleryBox.all
+        else
+            listOf(ObjectBox.galleryBox[galleryId])
 
         val jobs = galleries.map { gallery ->
             async(Dispatchers.IO) {
                 val sid = Network.login(gallery.connectionParams.target).sid
                 val sessionParams = gallery.connectionParams.target.toSessionParams(sid)
-                gallery.folder.target = MediaFolder(name = gallery.name)
+
+                mediaFileBox.query {
+                    equal(MediaFile_.galleryId, gallery.id)
+                }.remove()
+
+                mediaFolderBox.query {
+                    equal(MediaFolder_.galleryId, gallery.id)
+                }.remove()
+
+                gallery.folder.target = MediaFolder(name = gallery.name, galleryId = gallery.id)
                 ObjectBox.galleryBox.put(gallery)
                 scanGallery(sessionParams, gallery.path, gallery.folder.target, true)
             }
@@ -42,11 +62,16 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
         } catch (e: Exception) {
             e.log()
             ScanGalleriesPref.isSyncingGalleries = false
-            return@withContext Result.failure(workDataOf(ERROR_KEY to (e.localizedMessage ?: e.message )))
+            return@withContext Result.failure(
+                workDataOf(
+                    ERROR_KEY to (e.localizedMessage ?: e.message)
+                )
+            )
         }
 
         ScanGalleriesPref.isFirstSyncNeeded = false
         ScanGalleriesPref.isSyncingGalleries = false
+
         return@withContext Result.success()
     }
 
@@ -57,11 +82,11 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
             shares.forEach { share ->
                 if(share.isNotHidden()) {
                     if (share.isdir) {
-                        val mediaFolder = MediaFolder(name = share.name)
+                        val mediaFolder = MediaFolder(name = share.name, galleryId = mainFolder.galleryId)
                         mainFolder.childFolders.add(mediaFolder)
                         shareDirs.add(share.path to mediaFolder)
                     } else if (share.isPicture()) {
-                        mainFolder.childFiles.add(MediaFile(name = share.name))
+                        mainFolder.childFiles.add(MediaFile(name = share.name, galleryId = mainFolder.galleryId))
                     }
                 }
             }
@@ -84,18 +109,26 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
     }
 
     companion object {
-        private const val TAG = "scan_galleries_job"
+        const val TAG = "scan_galleries_job"
+        private const val GALLERY_ID = "gallery_id"
+        private const val FOLDER_ID = "folder_id"
+        private const val DAILY_SYNC_TAG = "dailysync_tag"
 
         const val ERROR_KEY = "scan_error"
 
-        fun setWorker(context: Context): UUID {
+        fun setWorker(context: Context, galleryId: Long, folderId: Long, dailySync: Boolean = false): UUID {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
+            val inputData = workDataOf(GALLERY_ID to galleryId,
+                FOLDER_ID to folderId,
+                DAILY_SYNC_TAG to dailySync)
+
             val work = OneTimeWorkRequestBuilder<ScanGalleriesWorker>()
                 .addTag(TAG)
                 .setConstraints(constraints)
+                .setInputData(inputData)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
                 .build()
 
