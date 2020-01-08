@@ -1,1 +1,3 @@
-<resources />
+<resources >
+    <color name="test">@android:color/holo_blue_dark</color>
+</resources>

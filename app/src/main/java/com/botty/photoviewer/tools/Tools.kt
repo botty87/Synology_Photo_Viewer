@@ -23,7 +23,7 @@ object Tools {
                 timeZone = TimeZone.getTimeZone("UTC")
         }
 
-    fun scanGalleries(activity: FragmentActivity, galleryId: Long, mainFolderId: Long = 0, onDone: ((Boolean) -> Unit)? = null) {
+    /*fun scanGalleries(activity: FragmentActivity, galleryId: Long, mainFolderId: Long = 0, onDone: ((Boolean) -> Unit)? = null) {
         activity.run {
             val workID = ScanGalleriesWorker.setWorker(this, galleryId, mainFolderId)
             WorkManager.getInstance(this).getWorkInfoByIdLiveData(workID)
@@ -51,5 +51,5 @@ object Tools {
                     }
                 }
         }
-    }
+    }*/
 }

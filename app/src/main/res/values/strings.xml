@@ -41,4 +41,5 @@
     <string name="gallery_scan">Gallery scan</string>
     <string name="do_you_want_scan">Do you want to scan</string>
     <string name="and_all_subfolders">and all the sub-folders</string>
+    <string name="galleries_scan_generic_error">Something wrong happened on the last galleries scan. Do you want to retry?</string>
 </resources>

@@ -10,124 +10,130 @@
     tools:context=".galleryViewer.GalleryViewActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/navDetailsLayout"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="#263238"
-        android:padding="10dp"
-        android:elevation="30dp"
-        app:layout_constraintWidth_percent="0.3"
-        app:layout_constraintLeft_toLeftOf="parent">
+        android:id="@+id/mainLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/navDetailsLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#263238"
+            android:padding="10dp"
+            android:elevation="30dp"
+            app:layout_constraintWidth_percent="0.3"
+            app:layout_constraintLeft_toLeftOf="parent">
+
+            <com.botty.tvrecyclerview.TvRecyclerView
+                android:id="@+id/recyclerViewFolders"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:focusable="true"
+                android:layout_marginBottom="5dp"
+                android:scrollbars="none"
+                app:scrollMode="followScroll"
+                app:focusScale="1"
+                app:focusDrawable="@drawable/folders_background"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/layoutPhotoAlbumDetails" />
+
+            <LinearLayout
+                android:id="@+id/layoutPhotoAlbumDetails"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/buttonSync">
+
+                <TextView
+                    android:id="@+id/textViewAlbumNameTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/album"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"/>
+
+                <com.botty.photoviewer.tools.ScrollTextView
+                    android:id="@+id/textViewAlbumName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:textStyle="italic"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:paddingTop="5dp" />
+
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/buttonSync"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:visibility="invisible"
+                android:src="@drawable/ic_sync_30dp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:background="@drawable/button_sync_background"
+                app:layout_constraintBottom_toBottomOf="@id/layoutPhotoAlbumDetails"
+                app:layout_constraintRight_toRightOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/viewGuide"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            app:layout_constraintLeft_toRightOf="@id/navDetailsLayout"/>
 
         <com.botty.tvrecyclerview.TvRecyclerView
-            android:id="@+id/recyclerViewFolders"
+            android:id="@+id/recyclerViewPictures"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:focusable="true"
-            android:layout_marginBottom="5dp"
-            android:scrollbars="none"
-            app:scrollMode="followScroll"
+            android:nextFocusLeft="@id/recyclerViewFolders"
             app:focusScale="1"
-            app:focusDrawable="@drawable/folders_background"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/layoutPhotoAlbumDetails" />
-
-        <LinearLayout
-            android:id="@+id/layoutPhotoAlbumDetails"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/buttonSync">
-
-            <TextView
-                android:id="@+id/textViewAlbumNameTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/album"
-                android:textAllCaps="true"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"/>
-
-            <com.botty.photoviewer.tools.ScrollTextView
-                android:id="@+id/textViewAlbumName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:textStyle="italic"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:paddingTop="5dp" />
-
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/buttonSync"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:visibility="invisible"
-            android:src="@drawable/ic_sync_30dp"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:background="@drawable/button_sync_background"
-            app:layout_constraintBottom_toBottomOf="@id/layoutPhotoAlbumDetails"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:focusDrawable="@drawable/picture_selected_background"
+            app:scrollMode="alignScroll"
+            android:scrollbars="none"
+            android:paddingBottom="15dp"
+            android:paddingTop="15dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:clipToPadding="false"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View
-        android:id="@+id/viewGuide"
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        app:layout_constraintLeft_toRightOf="@id/navDetailsLayout"/>
-
-    <com.botty.tvrecyclerview.TvRecyclerView
-        android:id="@+id/recyclerViewPictures"
+    <FrameLayout
+        android:id="@+id/scanLoaderView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:focusable="true"
-        android:nextFocusLeft="@id/recyclerViewFolders"
-        app:focusScale="1"
-        app:focusDrawable="@drawable/picture_selected_background"
-        app:scrollMode="alignScroll"
-        android:scrollbars="none"
-        android:paddingBottom="15dp"
-        android:paddingTop="15dp"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
-        android:clipToPadding="false"/>
-
-    <LinearLayout
-        android:id="@+id/layoutProgressLoader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:orientation="horizontal"
-        android:background="@android:color/holo_orange_dark"
-        android:gravity="center_vertical"
         android:visibility="gone"
-        android:padding="15dp">
+        android:padding="20dp"
+        android:background="#bbFFFFFF" >
+
+        <com.agrawalsuneet.loaderspack.loaders.PulseLoader
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:pulse_LineThickness="7dp"
+            app:pulse_normalIncrementalValue="8.0"
+            app:pulse_pulseColor="@color/test"
+            app:pulse_pulseIncrementalValue="50.0"
+            app:pulse_sideLength="200dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="15dp"
-            android:textSize="20sp"
+            android:layout_gravity="bottom|center"
+            android:textSize="30sp"
             android:textStyle="bold|italic"
-            android:textColor="@android:color/white"
-            android:text="@string/galleries_scan_please_wait"
-            tools:ignore="RtlHardcoded" />
+            android:textColor="@android:color/holo_red_light"
+            android:text="@string/galleries_scan_please_wait"/>
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/Widget.AppCompat.ProgressBar"/>
-
-    </LinearLayout>
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

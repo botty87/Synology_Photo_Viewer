@@ -25,8 +25,6 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
             return@withContext Result.retry()
         }
 
-        ScanGalleriesPref.isSyncingGalleries = true
-
         val galleryId = inputData.getLong(GALLERY_ID, 0L)
         val folderId = inputData.getLong(FOLDER_ID, 0L)
 
@@ -61,7 +59,6 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
             jobs.awaitAll()
         } catch (e: Exception) {
             e.log()
-            ScanGalleriesPref.isSyncingGalleries = false
             return@withContext Result.failure(
                 workDataOf(
                     ERROR_KEY to (e.localizedMessage ?: e.message)
@@ -70,7 +67,6 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
         }
 
         ScanGalleriesPref.isFirstSyncNeeded = false
-        ScanGalleriesPref.isSyncingGalleries = false
 
         return@withContext Result.success()
     }
@@ -116,7 +112,7 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
 
         const val ERROR_KEY = "scan_error"
 
-        fun setWorker(context: Context, galleryId: Long, folderId: Long, dailySync: Boolean = false): UUID {
+        fun setWorker(context: Context, galleryId: Long, folderId: Long = 0L, dailySync: Boolean = false): UUID {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()

@@ -25,6 +25,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : FragmentActivity() {
 
+    private var isGalleryScanRunning = false
+    private var showScanAdvices = false
+
     private val galleriesAdapter by lazy {
         GalleriesAdapter(Glide.with(this)).apply {
             onAddNewClick = this@MainActivity::onAddNewClick
@@ -48,24 +51,60 @@ class MainActivity : FragmentActivity() {
     private fun checkGalleriesScan() {
         WorkManager.getInstance(this).getWorkInfosForUniqueWorkLiveData(ScanGalleriesWorker.TAG)
             .observe(this) { worksInfo ->
-                if(!worksInfo.isEmpty()) {
+                worksInfo.firstOrNull().let { workInfo ->
+                    when (workInfo?.state) {
+                        WorkInfo.State.SUCCEEDED -> {
+                            isGalleryScanRunning = false
+                            if(showScanAdvices) {
+                                showSuccessToast(R.string.scan_completed)
+                            }
+                            layoutProgressLoader.hide(true)
+                        }
 
+                        WorkInfo.State.FAILED -> {
+                            val errorMessage = workInfo.outputData.getString(ScanGalleriesWorker.ERROR_KEY).let { error ->
+                                if(this.isNotNull()) {
+                                    "${getString(R.string.scan_error)}: $error\n${getString(R.string.retry_scan)}"
+                                } else {
+                                    getString(R.string.galleries_scan_generic_error)
+                                }
+                            }
+
+                            MaterialDialog(this).show {
+                                title(R.string.error)
+                                message(text = errorMessage)
+                                positiveButton(R.string.yes) {
+                                    scanGalleries()
+                                }
+                                negativeButton(R.string.no)
+                            }
+                            layoutProgressLoader.hide(true)
+                            isGalleryScanRunning = false
+                        }
+
+                        WorkInfo.State.RUNNING -> {
+                            layoutProgressLoader.show()
+                            showScanAdvices = true
+                            isGalleryScanRunning = true
+                        }
+
+                        else -> {
+                            layoutProgressLoader.hide(true)
+                            isGalleryScanRunning = false
+                        }
+                    }
                 }
             }
 
         if(ScanGalleriesPref.isFirstSyncNeeded) {
+            showScanAdvices = true
             scanGalleries()
         }
     }
 
     private fun scanGalleries(galleryId: Long = 0) {
         layoutProgressLoader.show()
-        Tools.scanGalleries(this, galleryId) { success ->
-            layoutProgressLoader.hide(true)
-            if(success) {
-                showSuccessToast(R.string.scan_completed, Toasty.LENGTH_LONG)
-            }
-        }
+        ScanGalleriesWorker.setWorker(this, galleryId)
     }
 
     private fun loadGalleries() {
@@ -73,7 +112,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun onAddNewClick() {
-        if(!ScanGalleriesPref.isSyncingGalleries) {
+        if(!isGalleryScanRunning) {
             startActivityForResult<AddShareActivity> { result ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     loadGalleries()
@@ -85,13 +124,14 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun onSettingsClick() {
-        if(!ScanGalleriesPref.isSyncingGalleries) {
+        if(!isGalleryScanRunning) {
             startActivity<SettingsActivity>()
         }
     }
 
     private fun onGalleryClick(gallery: Gallery) {
-        if(!ScanGalleriesPref.isSyncingGalleries) {
+        if(!isGalleryScanRunning) {
+            ScanGalleriesPref.isGalleryOpened = true
             startActivity<GalleryViewActivity>(Gallery.ID_TAG to gallery.id)
         }
     }

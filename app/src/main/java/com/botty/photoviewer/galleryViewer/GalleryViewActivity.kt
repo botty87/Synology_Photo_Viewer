@@ -12,6 +12,9 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.Worker
 import com.afollestad.materialdialogs.MaterialDialog
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.galleryViewer.FoldersAdapter
@@ -24,6 +27,8 @@ import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
 import com.botty.photoviewer.tools.*
 import com.botty.photoviewer.tools.network.Network
 import com.botty.photoviewer.tools.workers.LogoutWorker
+import com.botty.photoviewer.tools.workers.scanGalleries.ScanGalleriesPref
+import com.botty.photoviewer.tools.workers.scanGalleries.ScanGalleriesWorker
 import com.botty.tvrecyclerview.TvRecyclerView
 import com.bumptech.glide.Glide
 import com.github.florent37.kotlin.pleaseanimate.please
@@ -172,7 +177,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             onSyncGalleryClick()
         }
 
-        fun enableViews(isEnabled: Boolean) {
+        /* fun enableViews(isEnabled: Boolean) {
             recyclerViewFolders.isEnabled = isEnabled
             recyclerViewPictures.isEnabled = isEnabled
             buttonSync.isEnabled = isEnabled
@@ -183,7 +188,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             }
         }
 
-        enableViews(false)
+        enableViews(false) */
 
         //setAlbumDetails()
     }
@@ -469,25 +474,37 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private fun onSyncGalleryClick() {
         fun startSync() {
-            fun enableViews(isEnabled: Boolean) {
-                recyclerViewFolders.isEnabled = isEnabled
-                recyclerViewPictures.isEnabled = isEnabled
-                buttonSync.isEnabled = isEnabled
-                if(isEnabled) {
-                    layoutProgressLoader.hide(true)
-                } else {
-                    layoutProgressLoader.show()
-                }
-            }
+            mainLayout.hide()
+            scanLoaderView.show()
 
-            enableViews(false)
-            Tools.scanGalleries(this, gallery.id) { success ->
-                enableViews(true)
-                if(success) {
-                    showSuccessToast(R.string.scan_completed, Toasty.LENGTH_LONG)
-                    loadFoldersAndPictures(NavDirection.NONE)
+            val id = ScanGalleriesWorker.setWorker(this, gallery.id)
+            WorkManager.getInstance(this).getWorkInfoByIdLiveData(id)
+                .observe(this) { workInfo ->
+                    when(workInfo?.state) {
+                        WorkInfo.State.SUCCEEDED -> {
+                            mainLayout.show()
+                            scanLoaderView.hide(true)
+                            showSuccessToast(R.string.scan_completed)
+                            //TODO implements reload adapter
+                        }
+
+                        WorkInfo.State.FAILED -> {
+                            var errorMessage = workInfo.outputData.getString(ScanGalleriesWorker.ERROR_KEY)
+                            errorMessage = "${getString(R.string.scan_error)}: $errorMessage\n${getString(
+                                R.string.retry_scan)}"
+                            MaterialDialog(this).show {
+                                title(R.string.error)
+                                message(text = errorMessage)
+                                positiveButton(R.string.yes) {
+                                    startSync()
+                                }
+                                negativeButton(R.string.no)
+                            }
+                            scanLoaderView.hide(true)
+                            mainLayout.show()
+                        }
+                    }
                 }
-            }
         }
 
         val message = "${getString(R.string.do_you_want_scan)} ${currentFolder.name} ${getString(R.string.and_all_subfolders)}?"
@@ -512,8 +529,10 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
     }
 
     override fun onStop() {
-        if(isFinishing && ::sessionParams.isInitialized) {
-            LogoutWorker.setWorker(this, sessionParams)
+        if(isFinishing) {
+            ScanGalleriesPref.isGalleryOpened = false
+            if(::sessionParams.isInitialized)
+                LogoutWorker.setWorker(this, sessionParams)
         }
         super.onStop()
     }
