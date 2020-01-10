@@ -218,13 +218,13 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private fun loadFoldersAndPictures(navDirection: NavDirection) {
         launch {
-            val folders = async(Dispatchers.IO) {
-                currentFolder.childFolders
-            }
-
             when(navDirection) {
                 NavDirection.NEXT -> actualPath.add(currentFolder.name)
                 NavDirection.BACK -> actualPath.removeLast()
+            }
+
+            val folders = async(Dispatchers.IO) {
+                currentFolder.childFolders
             }
 
             when {
@@ -317,7 +317,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
                 nameToAdd?.run { actualPath.add(this) } ?: actualPath.removeLast()
 
-                when { TODO CHECK!!!!
+                when {
                     actualPath.size > 1 -> {
                         foldersAdapter.setFolders(folders.await(), actualPath[actualPath.size - 2])
                     }
@@ -477,7 +477,14 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             mainLayout.hide()
             scanLoaderView.show()
 
-            val id = ScanGalleriesWorker.setWorker(this, gallery.id)
+            //It means that this is the main gallery folder. Otherwise start the sync only from current folder
+            val folderId = if(currentFolder.parentFolder.targetId == 0L) {
+                0L
+            } else {
+                currentFolder.id
+            }
+
+            val id = ScanGalleriesWorker.setWorker(this, gallery.id, folderId)
             WorkManager.getInstance(this).getWorkInfoByIdLiveData(id)
                 .observe(this) { workInfo ->
                     when(workInfo?.state) {
@@ -485,7 +492,11 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                             mainLayout.show()
                             scanLoaderView.hide(true)
                             showSuccessToast(R.string.scan_completed)
-                            //TODO implements reload adapter
+                            //gallery = ObjectBox.galleryBox[gallery.id]
+                            //currentFolder = gallery.folder.target
+                            currentFolder = ObjectBox.mediaFolderBox[currentFolder.id]
+
+                            loadFoldersAndPictures(NavDirection.NONE)
                         }
 
                         WorkInfo.State.FAILED -> {

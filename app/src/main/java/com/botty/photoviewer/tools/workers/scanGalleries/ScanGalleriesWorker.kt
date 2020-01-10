@@ -8,6 +8,7 @@ import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.data.fileStructure.MediaFile_
 import com.botty.photoviewer.data.fileStructure.MediaFolder
 import com.botty.photoviewer.data.fileStructure.MediaFolder_
+import com.botty.photoviewer.tools.isNotNull
 import com.botty.photoviewer.tools.log
 import com.botty.photoviewer.tools.network.Network
 import com.botty.photoviewer.tools.network.responses.containers.Share
@@ -41,17 +42,51 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
                 val sid = Network.login(gallery.connectionParams.target).sid
                 val sessionParams = gallery.connectionParams.target.toSessionParams(sid)
 
-                mediaFileBox.query {
-                    equal(MediaFile_.galleryId, gallery.id)
-                }.remove()
+                if(folderId == 0L) {
+                    mediaFileBox.query {
+                        equal(MediaFile_.galleryId, gallery.id)
+                    }.remove()
 
-                mediaFolderBox.query {
-                    equal(MediaFolder_.galleryId, gallery.id)
-                }.remove()
+                    mediaFolderBox.query {
+                        equal(MediaFolder_.galleryId, gallery.id)
+                    }.remove()
 
-                gallery.folder.target = MediaFolder(name = gallery.name, galleryId = gallery.id)
-                ObjectBox.galleryBox.put(gallery)
-                scanGallery(sessionParams, gallery.path, gallery.folder.target, true)
+                    gallery.folder.target = MediaFolder(name = gallery.name, galleryId = gallery.id)
+                    ObjectBox.galleryBox.put(gallery)
+                    scanGallery(sessionParams, gallery.path, gallery.folder.target, true)
+                } else {
+                    var parentFolder = mediaFolderBox[folderId]
+
+                    var path = ""
+                    while (parentFolder.parentFolder.target.isNotNull()) {
+                        path = "/${parentFolder.name}$path"
+                        parentFolder = parentFolder.parentFolder.target
+                    }
+
+                    path = "${gallery.path}$path"
+
+                    val foldersIdToRemove = mutableListOf<Long>()
+                    val filesIdToRemove = mutableListOf<Long>()
+
+                    fun removeFolderAndSubContent(folderIdToClean: Long) {
+                        mediaFolderBox[folderIdToClean].run {
+                            val tempFold = this
+                            childFiles.forEach { mediaFile ->
+                                filesIdToRemove.add(mediaFile.id)
+                            }
+                            childFolders.forEach { mediaFolder ->
+                                foldersIdToRemove.add(mediaFolder.id)
+                                removeFolderAndSubContent(mediaFolder.id)
+                            }
+                        }
+                    }
+
+                    removeFolderAndSubContent(folderId)
+                    mediaFolderBox.remove(*foldersIdToRemove.toLongArray())
+                    mediaFileBox.remove(*filesIdToRemove.toLongArray())
+
+                    scanGallery(sessionParams, path, mediaFolderBox[folderId], true)
+                }
             }
         }
 
@@ -86,6 +121,7 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
                     }
                 }
             }
+
             ObjectBox.mediaFolderBox.put(mainFolder)
             runBlocking {
                 shareDirs.forEach { share ->

@@ -122,6 +122,8 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
                 timeoutException = true
             }
             pictureNotifier.postValue(picIndex)
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            e.log()
         }
     }
 

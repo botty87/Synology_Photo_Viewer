@@ -827,8 +827,6 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
         return false
     }
 
-
-    //TODO check for the focus anim
     @SuppressLint("LogNotTimber")
     private fun startFocusMoveAnim() {
         mScrollerFocusMoveAnim.abortAnimation()

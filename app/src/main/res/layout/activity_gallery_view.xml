@@ -32,6 +32,7 @@
                 android:focusable="true"
                 android:layout_marginBottom="5dp"
                 android:scrollbars="none"
+                android:nextFocusDown="@+id/buttonSync"
                 app:scrollMode="followScroll"
                 app:focusScale="1"
                 app:focusDrawable="@drawable/folders_background"
