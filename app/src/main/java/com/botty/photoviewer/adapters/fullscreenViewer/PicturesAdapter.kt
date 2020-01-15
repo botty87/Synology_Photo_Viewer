@@ -8,14 +8,12 @@ import android.view.ViewGroup
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import androidx.viewpager.widget.PagerAdapter
 import com.botty.photoviewer.R
-import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
 import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.tools.glide.GlideTools
 import com.botty.photoviewer.tools.showErrorToast
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_fullscreen_item.view.*
-import kotlin.math.absoluteValue
 
 class PicturesAdapter(
     private val pictures: List<MediaFile>,
@@ -49,9 +47,9 @@ class PicturesAdapter(
                 GlideTools.loadImageIntoView(glide, containerView.imageViewPicture, picture, context)
             }
 
-            picture.timeoutException -> {
+            picture.executionException -> {
                 GlideTools.setErrorImage(glide, containerView.imageViewPicture)
-                context.showErrorToast(R.string.timeoutException)
+                context.showErrorToast(R.string.timeout_or_missing_exception)
             }
 
             else -> CircularProgressDrawable(context).apply {

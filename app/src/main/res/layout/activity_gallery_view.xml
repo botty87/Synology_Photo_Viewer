@@ -32,7 +32,7 @@
                 android:focusable="true"
                 android:layout_marginBottom="5dp"
                 android:scrollbars="none"
-                android:nextFocusDown="@+id/buttonSync"
+                android:nextFocusDown="@+id/buttonViewMode"
                 app:scrollMode="followScroll"
                 app:focusScale="1"
                 app:focusDrawable="@drawable/folders_background"
@@ -80,7 +80,19 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:background="@drawable/button_sync_background"
                 app:layout_constraintBottom_toBottomOf="@id/layoutPhotoAlbumDetails"
-                app:layout_constraintRight_toRightOf="parent"/>
+                app:layout_constraintRight_toLeftOf="@id/buttonViewMode"
+                android:layout_marginRight="5dp"/>
+
+            <ImageButton
+                android:id="@+id/buttonViewMode"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:visibility="invisible"
+                android:src="@drawable/ic_image_30dp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:background="@drawable/button_sync_background"
+                app:layout_constraintBottom_toBottomOf="@id/layoutPhotoAlbumDetails"
+                app:layout_constraintRight_toRightOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

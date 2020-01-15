@@ -1,7 +1,6 @@
 package com.botty.photoviewer.galleryViewer
 
 import android.util.LruCache
-import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
 import com.botty.photoviewer.data.fileStructure.MediaFile
 

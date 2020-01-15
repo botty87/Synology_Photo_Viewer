@@ -14,13 +14,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.Worker
 import com.afollestad.materialdialogs.MaterialDialog
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.galleryViewer.FoldersAdapter
 import com.botty.photoviewer.adapters.galleryViewer.PicturesAdapter
-import com.botty.photoviewer.data.*
 import com.botty.photoviewer.data.Gallery
+import com.botty.photoviewer.data.ObjectBox
+import com.botty.photoviewer.data.PictureMetaContainer
+import com.botty.photoviewer.data.SessionParams
 import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.data.fileStructure.MediaFolder
 import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
@@ -125,8 +126,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private var downloadPicturesHandler: Handler? = null
 
-    //private lateinit var pictureGalleryPath: String
-
     private val currentFolderPath: String
         get() {
             var folderPath = gallery.path
@@ -143,19 +142,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
     private var falsePhotoFocused = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        /*fun setAlbumDetails() {
-            textViewAlbumName.text = gallery.name
-            textViewAlbumNameTitle.hide()
-            textViewAlbumName.text = getString(R.string.loading)
-            isFoldersVisible = true
-            recyclerViewPictures.mFocusBorderView?.drawBorder = false
-            please {
-                animate(recyclerViewPictures) {
-                    rightOf(viewGuide)
-                }
-            }.now()
-        }*/
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gallery_view)
         val galleryId = savedInstanceState?.getLong(Gallery.ID_TAG, 0L) ?:
@@ -176,21 +162,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         buttonSync.setOnClickListener {
             onSyncGalleryClick()
         }
-
-        /* fun enableViews(isEnabled: Boolean) {
-            recyclerViewFolders.isEnabled = isEnabled
-            recyclerViewPictures.isEnabled = isEnabled
-            buttonSync.isEnabled = isEnabled
-            if(isEnabled) {
-                layoutProgressLoader.hide(true)
-            } else {
-                layoutProgressLoader.show()
-            }
-        }
-
-        enableViews(false) */
-
-        //setAlbumDetails()
     }
 
     private fun performLogin() {
@@ -205,6 +176,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                     textViewAlbumNameTitle.show()
                     textViewAlbumName.clear()
                     buttonSync.show()
+                    buttonViewMode.show()
                     currentFolder = gallery.folder.target
                     loadFoldersAndPictures(NavDirection.NONE)
                 }.onFailure { e ->
@@ -269,111 +241,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             recyclerViewPictures.viewTreeObserver.addOnGlobalLayoutListener(recyclerViewLayoutListener)
         }
     }
-
-    /*private fun oldLoadFolder(path: String, nameToAdd: String? = null) {
-        fun showLoader() {
-            isLoadingFolder = true
-            recyclerViewFolders.hide()
-            recyclerViewPictures.hide()
-            recyclerViewPictures.mFocusBorderView?.hide()
-            recyclerViewFolders.mFocusBorderView?.hide()
-            textViewAlbumNameTitle.hide()
-            textViewAlbumName.text = getString(R.string.loading)
-            progressPicturesLoader.show()
-        }
-
-        fun hideLoader() {
-            isLoadingFolder = false
-            progressPicturesLoader.hide()
-            recyclerViewFolders.show()
-            recyclerViewFolders.mFocusBorderView?.show()
-            recyclerViewPictures.mFocusBorderView?.show()
-            recyclerViewPictures.show()
-            textViewAlbumNameTitle.show()
-        }
-
-        launch {
-            runCatching {
-                //showLoader()
-                picturesLoader.pictureNotifier.removeObservers(this@GalleryViewActivity)
-                picturesLoader.cancelDownload(true)
-                Network.getFoldersContent(sessionParams, path)
-            }.onSuccess { response ->
-                pictureGalleryPath = path
-
-                val folders = async(Dispatchers.Default) {
-                    response.files.filter { file ->
-                        file.isdir && file.isNotHidden()
-                    }
-                }
-                val picturesName = async(Dispatchers.Default) {
-                    response.files.filter { file ->
-                        file.isPicture() && file.isNotHidden()
-                    }.map { share ->
-                        val hash = getPictureFileHash(share.name)
-                        PictureContainer(share.name, hash)
-                    }
-                }
-
-                nameToAdd?.run { actualPath.add(this) } ?: actualPath.removeLast()
-
-                when {
-                    actualPath.size > 1 -> {
-                        foldersAdapter.setFolders(folders.await(), actualPath[actualPath.size - 2])
-                    }
-                    actualPath.size == 1 -> {
-                        foldersAdapter.setFolders(folders.await(), gallery.name)
-                    }
-                    else -> {
-                        foldersAdapter.setFolders(folders.await())
-                    }
-                }
-
-                picturesName.await().run {
-                    setNewPictures(this)
-                }
-                textViewAlbumName.text = actualPath.lastOrNull() ?: gallery.name
-
-                falsePhotoFocused = false
-                try {
-                    recyclerViewPictures.setItemSelected(0)
-                } catch (e: Exception) {
-                    //Sometimes it could happens. In case go next
-                    e.log()
-                }
-                recyclerViewFolders.setItemSelected(0)
-                //hideLoader()
-                Handler().postDelayed({
-                    falsePhotoFocused = true
-                }, 320)
-            }.onFailure { e ->
-                e.log()
-                //hideLoader()
-                showErrorToast(e.localizedMessage ?: getString(R.string.error))
-            }
-        }
-    } */
-
-    /*private fun setNewPictures(newPictures: List<PictureContainer>) {
-        pictures.clear()
-        pictures.addAll(newPictures)
-        picturesAdapter.notifyDataSetChanged()
-        picturesLoader.setNewGalleryPath(pictureGalleryPath)
-        if(pictures.isEmpty()) {
-            return
-        }
-
-        var recyclerViewLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
-        recyclerViewLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            recyclerViewPictures.viewTreeObserver.removeOnGlobalLayoutListener(recyclerViewLayoutListener)
-            recyclerViewLayoutListener = null
-            picturesLoader.pictureNotifier.observe(this) { picIndex ->
-                recyclerViewPictures.adapter?.notifyItemChanged(picIndex)
-            }
-            startDownloadPictures(false)
-        }
-        recyclerViewPictures.viewTreeObserver.addOnGlobalLayoutListener(recyclerViewLayoutListener)
-    }*/
 
     private fun onFolderClick(folder: MediaFolder) {
         currentFolder = folder
@@ -492,10 +359,10 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                             mainLayout.show()
                             scanLoaderView.hide(true)
                             showSuccessToast(R.string.scan_completed)
-                            //gallery = ObjectBox.galleryBox[gallery.id]
-                            //currentFolder = gallery.folder.target
-                            currentFolder = ObjectBox.mediaFolderBox[currentFolder.id]
+                            val newFolderId = workInfo.outputData.getLong(ScanGalleriesWorker.FOLDER_ID,
+                                ObjectBox.galleryBox[gallery.id].folder.targetId)
 
+                            currentFolder = ObjectBox.mediaFolderBox[newFolderId]
                             loadFoldersAndPictures(NavDirection.NONE)
                         }
 

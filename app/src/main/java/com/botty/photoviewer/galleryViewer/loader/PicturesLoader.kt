@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.botty.photoviewer.data.JobDownloadStatus
-import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.SessionParams
 import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.tools.*
@@ -119,7 +118,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
             e.log()
             pictures[picIndex].run {
                 file = null
-                timeoutException = true
+                executionException = true
             }
             pictureNotifier.postValue(picIndex)
         } catch (e: ArrayIndexOutOfBoundsException) {

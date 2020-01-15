@@ -57,22 +57,6 @@ object GlideTools {
     }
 
     private fun loadImage(glide: RequestManager,
-                  imageView: ImageView,
-                  pictureContainer: PictureContainer,
-                  context: Context,
-                  rotateTransformation: RotateTransformation? = null) {
-        glide
-            .load(pictureContainer.file!!)
-            .placeholder(getPlaceHolder(context))
-            .error(R.drawable.ic_broken_image_220dp)
-            .thumbnail(0.3f)
-            .apply {
-                rotateTransformation?.run { transform(this) }
-            }
-            .into(imageView)
-    }
-
-    private fun loadImage(glide: RequestManager,
                           imageView: ImageView,
                           mediaFile: MediaFile,
                           context: Context,

@@ -28,10 +28,7 @@
     <string name="connection_exist">Connection already exist!</string>
     <string name="album">Album</string>
     <string name="loading">Loading…</string>
-    <string name="timeoutException">Timeout exception</string>
-    <string name="daily_update_message">Daily auto-update your galleries collection</string>
-    <string name="show_subfolders_message">Show all the sub-folders pictures</string>
-    <string name="settings">Settings</string>
+    <string name="timeout_or_missing_exception">Timeout or missing picture</string>
     <string name="galleries_scan_please_wait">Galleries scan, please wait…</string>
     <string name="scan_completed">Scan completed!</string>
     <string name="retry_scan">Do you want to retry?</string>

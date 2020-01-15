@@ -29,9 +29,6 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="${enableCrashReporting}" />
 
-        <activity android:name=".settings.SettingsActivity"
-            android:screenOrientation="landscape"/>
-
         <activity android:name=".galleryViewer.FullscreenViewerActivity"
             android:screenOrientation="landscape"/>
 

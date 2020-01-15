@@ -1,9 +1,9 @@
 package com.botty.photoviewer.main
 
 import android.app.Activity
+import android.app.Instrumentation
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -14,13 +14,11 @@ import com.botty.photoviewer.addGallery.AddShareActivity
 import com.botty.photoviewer.data.Gallery
 import com.botty.photoviewer.data.ObjectBox
 import com.botty.photoviewer.galleryViewer.GalleryViewActivity
-import com.botty.photoviewer.settings.SettingsActivity
 import com.botty.photoviewer.tools.*
 import com.botty.photoviewer.tools.network.Network
 import com.botty.photoviewer.tools.workers.scanGalleries.ScanGalleriesPref
 import com.botty.photoviewer.tools.workers.scanGalleries.ScanGalleriesWorker
 import com.bumptech.glide.Glide
-import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : FragmentActivity() {
@@ -32,7 +30,6 @@ class MainActivity : FragmentActivity() {
         GalleriesAdapter(Glide.with(this)).apply {
             onAddNewClick = this@MainActivity::onAddNewClick
             onGalleryClick = this@MainActivity::onGalleryClick
-            onSettingsClick = this@MainActivity::onSettingsClick
 
             val width = resources.getDimension(R.dimen.gallery_width).toInt()
             recyclerViewGalleries.layoutManager = GridAutofitLayoutManager(this@MainActivity, width)
@@ -120,12 +117,6 @@ class MainActivity : FragmentActivity() {
                     scanGalleries(galleryId)
                 }
             }
-        }
-    }
-
-    private fun onSettingsClick() {
-        if(!isGalleryScanRunning) {
-            startActivity<SettingsActivity>()
         }
     }
 

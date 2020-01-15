@@ -37,6 +37,8 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
         else
             listOf(ObjectBox.galleryBox[galleryId])
 
+        var newMainFolderId = folderId
+
         val jobs = galleries.map { gallery ->
             async(Dispatchers.IO) {
                 val sid = Network.login(gallery.connectionParams.target).sid
@@ -53,6 +55,7 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
 
                     gallery.folder.target = MediaFolder(name = gallery.name, galleryId = gallery.id)
                     ObjectBox.galleryBox.put(gallery)
+                    newMainFolderId = gallery.folder.targetId
                     scanGallery(sessionParams, gallery.path, gallery.folder.target, true)
                 } else {
                     var parentFolder = mediaFolderBox[folderId]
@@ -70,7 +73,6 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
 
                     fun removeFolderAndSubContent(folderIdToClean: Long) {
                         mediaFolderBox[folderIdToClean].run {
-                            val tempFold = this
                             childFiles.forEach { mediaFile ->
                                 filesIdToRemove.add(mediaFile.id)
                             }
@@ -103,7 +105,7 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
 
         ScanGalleriesPref.isFirstSyncNeeded = false
 
-        return@withContext Result.success()
+        return@withContext Result.success(workDataOf(FOLDER_ID to newMainFolderId))
     }
 
     private suspend fun scanGallery(sessionParams:SessionParams, path: String,
@@ -143,7 +145,7 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
     companion object {
         const val TAG = "scan_galleries_job"
         private const val GALLERY_ID = "gallery_id"
-        private const val FOLDER_ID = "folder_id"
+        const val FOLDER_ID = "folder_id"
         private const val DAILY_SYNC_TAG = "dailysync_tag"
 
         const val ERROR_KEY = "scan_error"

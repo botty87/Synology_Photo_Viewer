@@ -1,18 +1,6 @@
 package com.botty.photoviewer.tools
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.observe
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import com.afollestad.materialdialogs.MaterialDialog
-import com.botty.photoviewer.R
-import com.botty.photoviewer.tools.workers.scanGalleries.ScanGalleriesWorker
-import es.dmoral.toasty.Toasty
-import kotlinx.android.synthetic.main.activity_main.*
-import java.security.AccessControlContext
 import java.text.SimpleDateFormat
 import java.util.*
 

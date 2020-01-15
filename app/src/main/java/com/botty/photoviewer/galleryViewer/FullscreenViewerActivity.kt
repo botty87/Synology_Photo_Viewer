@@ -16,7 +16,6 @@ import androidx.viewpager.widget.ViewPager
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.fullscreenViewer.PicturesAdapter
 import com.botty.photoviewer.data.ObjectBox
-import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
 import com.botty.photoviewer.data.SessionParams
 import com.botty.photoviewer.data.fileStructure.MediaFile
@@ -30,7 +29,6 @@ import kotlinx.android.synthetic.main.activity_fullscreen_viewer.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kotlin.math.absoluteValue
 
 private const val INFO_DELAY = 3000L
 

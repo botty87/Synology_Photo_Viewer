@@ -17,7 +17,6 @@ import kotlinx.android.synthetic.main.gallery_item.view.*
 class GalleriesAdapter(private val glide: RequestManager) : AdapterWithFocus<GenericHolder>(true) {
 
     var onAddNewClick: (() -> Unit)? = null
-    var onSettingsClick: (() -> Unit)? = null
     var onGalleryClick: ((Gallery) -> Unit)? = null
 
     private val diffUtilCallback = object: DiffUtil.ItemCallback<Gallery>() {
@@ -32,17 +31,16 @@ class GalleriesAdapter(private val glide: RequestManager) : AdapterWithFocus<Gen
     private val galleries = AsyncListDiffer(this, diffUtilCallback)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericHolder {
-        val resLayout = when (viewType) {
-            GALLERY_TYPE -> R.layout.gallery_item
-            SETTINGS_TYPE -> R.layout.settings_item
-            else -> R.layout.add_gallery_item
-        }
+        val resLayout = if (viewType == GALLERY_TYPE)
+            R.layout.gallery_item
+        else
+            R.layout.add_gallery_item
 
         return LayoutInflater.from(parent.context).inflate(resLayout, parent, false)
             .run { GenericHolder(this) }
     }
 
-    override fun getItemCount() = galleries.size + 2
+    override fun getItemCount() = galleries.size + 1
 
     override fun onBindViewHolder(holder: GenericHolder, position: Int) {
         fun bindGalleryView() {
@@ -65,32 +63,18 @@ class GalleriesAdapter(private val glide: RequestManager) : AdapterWithFocus<Gen
             }
         }
 
-        fun bindSettingsView() {
-            holder.itemView.setOnClickListener {
-                onSettingsClick?.invoke()
-            }
-        }
-
         super.onBindViewHolder(holder, position)
         when(holder.itemViewType) {
             GALLERY_TYPE -> bindGalleryView()
             ADD_NEW_TYPE -> bindAddNewView()
-            SETTINGS_TYPE -> bindSettingsView()
         }
     }
 
-    override fun getItemViewType(position: Int) = when {
-        position < itemCount - 2 -> {
-            GALLERY_TYPE
-        }
-
-        position == itemCount - 2 -> {
-            ADD_NEW_TYPE
-        }
-
-        else -> {
-            SETTINGS_TYPE
-        }
+    override fun getItemViewType(position: Int) = if (position == itemCount - 1) {
+        ADD_NEW_TYPE
+    }
+    else {
+        GALLERY_TYPE
     }
 
     fun setNewGalleries(galleries: List<Gallery>) {
@@ -100,6 +84,5 @@ class GalleriesAdapter(private val glide: RequestManager) : AdapterWithFocus<Gen
     companion object {
         private const val GALLERY_TYPE = 1
         private const val ADD_NEW_TYPE = 2
-        private const val SETTINGS_TYPE = 3
     }
 }

@@ -57,9 +57,9 @@ class PicturesAdapter(private val glideManager: RequestManager,
                 }
             }
 
-            picture.timeoutException -> {
+            picture.executionException -> {
                 GlideTools.setErrorImage(glideManager, holder.itemView.imageViewPicture)
-                context.showErrorToast(R.string.timeoutException)
+                context.showErrorToast(R.string.timeout_or_missing_exception)
             }
 
             else -> {

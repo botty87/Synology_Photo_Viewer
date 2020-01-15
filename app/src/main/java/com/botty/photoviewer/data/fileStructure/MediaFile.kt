@@ -17,7 +17,7 @@ data class MediaFile(
     @Transient
     var file: File? = null,
     @Transient
-    var timeoutException: Boolean = false
+    var executionException: Boolean = false
 ) {
     lateinit var folder: ToOne<MediaFolder>
 

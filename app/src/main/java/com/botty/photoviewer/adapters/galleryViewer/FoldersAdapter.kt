@@ -7,7 +7,6 @@ import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
 import com.botty.photoviewer.data.fileStructure.MediaFolder
 import com.botty.photoviewer.tools.isNotNull
-import com.botty.photoviewer.tools.network.responses.containers.Share
 import kotlinx.android.synthetic.main.gallery_folder_item.view.*
 import kotlinx.android.synthetic.main.gallery_parent_folder.view.*
 
