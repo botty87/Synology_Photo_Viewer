@@ -24,4 +24,11 @@ data class MediaFile(
     constructor(id: Long, name: String, galleryId: Long ,folderId: Long) : this(id, name, galleryId) {
         this.folder.targetId = folderId
     }
+
+    fun isPicture() = id != HEADER_ID
+
+    companion object {
+        private const val HEADER_ID = -1L
+        fun getHeaderMediaFile(title: String) = MediaFile(HEADER_ID, title, HEADER_ID, HEADER_ID)
+    }
 }

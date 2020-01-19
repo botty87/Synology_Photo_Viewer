@@ -33,6 +33,8 @@ import com.botty.photoviewer.tools.workers.scanGalleries.ScanGalleriesWorker
 import com.botty.tvrecyclerview.TvRecyclerView
 import com.bumptech.glide.Glide
 import com.github.florent37.kotlin.pleaseanimate.please
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_gallery_view.*
 import kotlinx.coroutines.*
@@ -95,7 +97,10 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         PicturesAdapter(glideManager, picturesMetaCache, pictures, this)
             .apply {
                 setHasStableIds(true)
-                recyclerViewPictures.layoutManager = GridAutofitLayoutManager(this@GalleryViewActivity, width)
+                //recyclerViewPictures.layoutManager = GridAutofitLayoutManager(this@GalleryViewActivity, width)
+                recyclerViewPictures.layoutManager = FlexboxLayoutManager(this@GalleryViewActivity).apply {
+                    justifyContent = JustifyContent.SPACE_BETWEEN
+                }
                 recyclerViewPictures.setHasFixedSize(true)
                 recyclerViewPictures.itemAnimator = null
                 recyclerViewPictures.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -164,6 +169,26 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }
     }
 
+    private fun setButtonViewMode() {
+
+        fun setBackground() {
+            if(GalleryPreferences.showSubfolders) {
+                buttonViewMode.setImageResource(R.drawable.ic_collections_30dp)
+            } else {
+                buttonViewMode.setImageResource(R.drawable.ic_image_30dp)
+            }
+        }
+
+        buttonViewMode.setOnClickListener {
+            GalleryPreferences.showSubfolders = !GalleryPreferences.showSubfolders
+            setBackground()
+            loadFoldersAndPictures(NavDirection.NONE)
+        }
+
+        GalleryPreferences.showSubfolders = false
+        setBackground()
+    }
+
     private fun performLogin() {
         gallery.connectionParams.target.let { conParams ->
             launch {
@@ -177,6 +202,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                     textViewAlbumName.clear()
                     buttonSync.show()
                     buttonViewMode.show()
+                    setButtonViewMode()
                     currentFolder = gallery.folder.target
                     loadFoldersAndPictures(NavDirection.NONE)
                 }.onFailure { e ->
@@ -217,7 +243,29 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             picturesLoader.cancelDownload(true)
 
             val newPictures = async(Dispatchers.IO) {
-                currentFolder.childFiles
+                if(GalleryPreferences.showSubfolders) {
+                    val pictures = mutableListOf<MediaFile>()
+
+                    fun addPictures(folder: MediaFolder, basePath: String) {
+                        val title = "$basePath\\${folder.name}"
+                        if(folder.childFiles.isNotEmpty()) {
+                            pictures.add(MediaFile.getHeaderMediaFile(title))
+                            pictures.addAll(folder.childFiles)
+                        }
+                        /*folder.childFolders.forEach { childFolder ->
+                            addPictures(childFolder, title)
+                        }*/
+                    }
+
+                    runBlocking {
+                        addPictures(currentFolder, currentFolderPath)
+                    }
+
+                    pictures
+                }
+                else {
+                    currentFolder.childFiles
+                }
             }
 
             pictures.clear()
@@ -319,15 +367,21 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         downloadPicturesHandler = null
 
         val runnable = Runnable {
-            val firstPosition =
+            //TODO Check!
+            /*val firstPosition =
                 (recyclerViewPictures.layoutManager as GridAutofitLayoutManager)
                     .findFirstCompletelyVisibleItemPosition()
             val lastPosition =
                 (recyclerViewPictures.layoutManager as GridAutofitLayoutManager)
-                    .findLastCompletelyVisibleItemPosition()
+                    .findLastCompletelyVisibleItemPosition()*/
 
-            picturesLoader.startDownload(firstPosition, lastPosition)
-            downloadPicturesHandler = null
+            (recyclerViewPictures.layoutManager as FlexboxLayoutManager).run {
+                val firstPosition = findFirstCompletelyVisibleItemPosition()
+                val lastPosition = findLastCompletelyVisibleItemPosition()
+
+                picturesLoader.startDownload(firstPosition, lastPosition)
+                downloadPicturesHandler = null
+            }
         }
 
         if(withDelay) {
@@ -400,9 +454,9 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         if(actualPath.isEmpty()) {
             super.onBackPressed()
         } else {
-            //recyclerViewFolders.getChildAt(0).requestFocus()
             recyclerViewPictures.setItemSelected(-1)
             onParentClick()
+            recyclerViewFolders.getChildAt(0).requestFocus()
         }
     }
 
