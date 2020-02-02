@@ -1,7 +1,6 @@
 package com.botty.photoviewer.main
 
 import android.app.Activity
-import android.app.Instrumentation
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.observe

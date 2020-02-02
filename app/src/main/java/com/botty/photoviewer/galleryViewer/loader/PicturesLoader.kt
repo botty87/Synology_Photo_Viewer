@@ -24,8 +24,6 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
 
     private var galleryPath: String? = null
 
-    private val debugTag = "ldpic -"
-
     fun setNewGalleryPath(galleryPath: String) {
         cancelDownload(false)
         this.galleryPath = galleryPath
@@ -46,7 +44,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
             return
         }
         activeWorkingJob = viewModelScope.launch(Dispatchers.Default) {
-            Timber.d("$debugTag start download")
+            Timber.d("$DEBUG_TAG start download")
             currentDownloadStatus = JobDownloadStatus.CURRENT_PIC
 
             if(downloadPictureJobs.isNotEmpty()) {
@@ -78,7 +76,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
 
             for (picIndex in firstIndex..lastIndex) {
                 if (downloadPictureJobs[picIndex] == null) {
-                    Timber.d("$debugTag start $picIndex")
+                    Timber.d("$DEBUG_TAG start $picIndex")
                     viewModelScope.launch {
                         downloadAndNotify(picIndex)
                     }.let { job ->
@@ -88,7 +86,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
                         }
                     }
                 } else {
-                    Timber.d("$debugTag skip $picIndex")
+                    Timber.d("$DEBUG_TAG skip $picIndex")
                 }
             }
         }
@@ -109,7 +107,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
                     .let { picFile ->
                         pictures[picIndex].file = picFile
                         pictureNotifier.postValue(picIndex)
-                        Timber.d("$debugTag pic $picIndex downloaded")
+                        Timber.d("$DEBUG_TAG pic $picIndex downloaded")
                     }
             }
         } catch (e: NullPointerException) {
@@ -236,5 +234,9 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return PicturesLoader(sessionParams, glide, pictures, preloadSize) as T
         }
+    }
+
+    companion object {
+        private const val DEBUG_TAG = "ldpic -"
     }
 }

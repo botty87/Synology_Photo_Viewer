@@ -97,10 +97,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         PicturesAdapter(glideManager, picturesMetaCache, pictures, this)
             .apply {
                 setHasStableIds(true)
-                //recyclerViewPictures.layoutManager = GridAutofitLayoutManager(this@GalleryViewActivity, width)
-                recyclerViewPictures.layoutManager = FlexboxLayoutManager(this@GalleryViewActivity).apply {
-                    justifyContent = JustifyContent.SPACE_BETWEEN
-                }
+                recyclerViewPictures.layoutManager = GridAutofitLayoutManager(this@GalleryViewActivity, width)
                 recyclerViewPictures.setHasFixedSize(true)
                 recyclerViewPictures.itemAnimator = null
                 recyclerViewPictures.addOnScrollListener(object : RecyclerView.OnScrollListener() {

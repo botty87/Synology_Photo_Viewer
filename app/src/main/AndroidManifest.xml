@@ -24,17 +24,18 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:supportsRtl,android:allowBackup">
+        <activity android:name=".TestActivity"></activity>
 
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
             android:value="${enableCrashReporting}" />
 
-        <activity android:name=".galleryViewer.FullscreenViewerActivity"
-            android:screenOrientation="landscape"/>
-
-        <activity android:name=".galleryViewer.GalleryViewActivity"
-            android:screenOrientation="landscape"/>
-
+        <activity
+            android:name=".galleryViewer.FullscreenViewerActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".galleryViewer.GalleryViewActivity"
+            android:screenOrientation="landscape" />
         <activity
             android:name=".main.MainActivity"
             android:banner="@drawable/banner"

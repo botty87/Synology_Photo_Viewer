@@ -62,17 +62,18 @@ dependencies {
     implementation 'com.github.bumptech.glide:recyclerview-integration:4.10.0'
     implementation 'com.github.florent37:diagonallayout:1.1.1'
     implementation 'com.flaviofaria:kenburnsview:1.0.7'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0-rc03'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-rc03'
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-rc03"
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
     implementation 'com.jakewharton.timber:timber:4.7.1'
-    implementation 'androidx.work:work-runtime-ktx:2.3.0-rc01'
+    implementation 'androidx.work:work-runtime-ktx:2.3.0'
     implementation 'com.drewnoakes:metadata-extractor:2.12.0'
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     implementation 'com.chibatching.kotpref:kotpref:2.10.0'
     implementation 'com.google.android:flexbox:2.0.1'
     implementation 'com.agrawalsuneet.androidlibs:loaderspack:1.2.3'
+    implementation 'io.github.luizgrp.sectionedrecyclerviewadapter:sectionedrecyclerviewadapter:3.1.0'
 }
 
 apply plugin: 'io.objectbox'
