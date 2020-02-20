@@ -32,40 +32,28 @@ class PicturesAdapter(private val glideManager: RequestManager,
 
     override fun getItemCount() = picturesList.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericHolder {
-        val layout = if(viewType == PICTURE_TYPE) R.layout.picture_item
-            else R.layout.header_album_item
-
-        return LayoutInflater.from(parent.context).inflate(layout, parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)=
+        LayoutInflater.from(parent.context).inflate(R.layout.picture_item, parent, false)
             .run { GenericHolder(this) }
-    }
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: GenericHolder, position: Int) {
         val picture = picturesList[holder.adapterPosition]
-        if(picture.isPicture()) {
-            when {
-                picture.file?.exists() == true -> {
-                    if (picture.name.endsWith(".webp", true)) {
-                        runCatching {
-                            pictureMetaCache[picture.id].rotation
-                        }.onSuccess { rotation ->
-                            GlideTools.loadWebpImageIntoView(
-                                glideManager,
-                                holder.itemView.imageViewPicture,
-                                picture,
-                                context,
-                                rotation
-                            )
-                        }.onFailure {
-                            GlideTools.loadImageIntoView(
-                                glideManager,
-                                holder.itemView.imageViewPicture,
-                                picture,
-                                context
-                            )
-                        }
-                    } else {
+
+        when {
+            picture.file?.exists() == true -> {
+                if (picture.name.endsWith(".webp", true)) {
+                    runCatching {
+                        pictureMetaCache[picture.id].rotation
+                    }.onSuccess { rotation ->
+                        GlideTools.loadWebpImageIntoView(
+                            glideManager,
+                            holder.itemView.imageViewPicture,
+                            picture,
+                            context,
+                            rotation
+                        )
+                    }.onFailure {
                         GlideTools.loadImageIntoView(
                             glideManager,
                             holder.itemView.imageViewPicture,
@@ -73,51 +61,44 @@ class PicturesAdapter(private val glideManager: RequestManager,
                             context
                         )
                     }
-
-                    runCatching {
-                        pictureMetaCache[picture.id].originDate
-                    }.onSuccess { picDate ->
-                        holder.itemView.textViewDate.text = dateParser.format(picDate)
-                    }
+                } else {
+                    GlideTools.loadImageIntoView(
+                        glideManager,
+                        holder.itemView.imageViewPicture,
+                        picture,
+                        context
+                    )
                 }
 
-                picture.executionException -> {
-                    GlideTools.setErrorImage(glideManager, holder.itemView.imageViewPicture)
-                    context.showErrorToast(R.string.timeout_or_missing_exception)
-                }
-
-                else -> {
-                    CircularProgressDrawable(context).apply {
-                        strokeWidth = 5f
-                        centerRadius = 30f
-                        this.setColorSchemeColors(Color.RED)
-                        start()
-                    }.let { prog ->
-                        holder.itemView.imageViewPicture.setImageDrawable(prog)
-                    }
-                    picturesList[holder.adapterPosition].file = null
+                runCatching {
+                    pictureMetaCache[picture.id].originDate
+                }.onSuccess { picDate ->
+                    holder.itemView.textViewDate.text = dateParser.format(picDate)
                 }
             }
 
-            holder.itemView.textViewName.text = picture.name
-        } else {
-            (holder.itemView as TextView).text = picture.name
+            picture.executionException -> {
+                GlideTools.setErrorImage(glideManager, holder.itemView.imageViewPicture)
+                context.showErrorToast(R.string.timeout_or_missing_exception)
+            }
+
+            else -> {
+                CircularProgressDrawable(context).apply {
+                    strokeWidth = 5f
+                    centerRadius = 30f
+                    this.setColorSchemeColors(Color.RED)
+                    start()
+                }.let { prog ->
+                    holder.itemView.imageViewPicture.setImageDrawable(prog)
+                }
+                picturesList[holder.adapterPosition].file = null
+            }
         }
+
+        holder.itemView.textViewName.text = picture.name
     }
 
     override fun getItemId(position: Int): Long = picturesList[position].id
-
-    override fun getItemViewType(position: Int): Int {
-        return try {
-            if (picturesList[position].isPicture()) {
-                PICTURE_TYPE
-            } else {
-                HEADER_TYPE
-            }
-        } catch (e: IndexOutOfBoundsException) {
-            PICTURE_TYPE
-        }
-    }
 
     override fun onViewRecycled(holder: GenericHolder) {
         if(getItemViewType(holder.adapterPosition) == PICTURE_TYPE) {

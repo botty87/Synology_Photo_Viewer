@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
@@ -18,10 +19,10 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.galleryViewer.FoldersAdapter
 import com.botty.photoviewer.adapters.galleryViewer.PicturesAdapter
-import com.botty.photoviewer.data.Gallery
-import com.botty.photoviewer.data.ObjectBox
-import com.botty.photoviewer.data.PictureMetaContainer
-import com.botty.photoviewer.data.SessionParams
+import com.botty.photoviewer.adapters.galleryViewer.pictureAdapter.HeaderItem
+import com.botty.photoviewer.adapters.galleryViewer.pictureAdapter.InfiniteScrollListener
+import com.botty.photoviewer.adapters.galleryViewer.pictureAdapter.PictureItem
+import com.botty.photoviewer.data.*
 import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.data.fileStructure.MediaFolder
 import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
@@ -34,18 +35,22 @@ import com.botty.tvrecyclerview.TvRecyclerView
 import com.bumptech.glide.Glide
 import com.github.florent37.kotlin.pleaseanimate.please
 import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.Section
+import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import es.dmoral.toasty.Toasty
 import kotlinx.android.synthetic.main.activity_gallery_view.*
 import kotlinx.coroutines.*
+
+//TODO LazyThreadSafetyMode.NONE
 
 @SuppressLint("SimpleDateFormat")
 class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private enum class NavDirection {NEXT, BACK, NONE}
 
-    private val pictures = mutableListOf<MediaFile>()
-    private val picturesMetaCache by lazy { CacheMetadata(200, pictures) }
+    private val galleryContainers by lazy { mutableListOf<GalleryContainer>() }
+    private val picturesMetaCache by lazy { CacheMetadata(200, galleryContainers) }
 
     private lateinit var gallery: Gallery
     private lateinit var sessionParams: SessionParams
@@ -92,7 +97,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private val glideManager by lazy { Glide.with(this) }
 
-    private val picturesAdapter by lazy {
+    /*private val picturesAdapter by lazy {
         val width = resources.getDimension(R.dimen.picture_size).toInt()
         PicturesAdapter(glideManager, picturesMetaCache, pictures, this)
             .apply {
@@ -124,6 +129,57 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                 })
                 recyclerViewPictures.setSelectPadding(5, 5, 5, 5)
             }
+    }*/
+
+    private val layoutManager by lazy {
+        val width = resources.getDimension(R.dimen.picture_size).toInt()
+        GridAutofitLayoutManager(this, width)
+    }
+
+    private val newPicturesAdapter by lazy {
+        GroupAdapter<GroupieViewHolder>().also { adapter ->
+
+            /*val layoutManager = GridLayoutManager(this@GalleryViewActivity, 4).apply {
+                spanSizeLookup = adapter.spanSizeLookup
+            }*/
+
+            layoutManager.spanSizeLookup = adapter.spanSizeLookup
+            recyclerViewPictures.layoutManager = layoutManager
+
+            recyclerViewPictures.setHasFixedSize(true)
+            recyclerViewPictures.itemAnimator = null
+            /*recyclerViewPictures.addOnScrollListener(object : InfiniteScrollListener(layoutManager) {
+                override fun onLoadMore(current_page: Int) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+
+            })*/
+
+
+            /*recyclerViewPictures.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    when(newState) {
+                        RecyclerView.SCROLL_STATE_IDLE -> {
+                            startDownloadPictures(true)
+                        }
+                    }
+                }
+            })*/
+
+            recyclerViewPictures.adapter = adapter
+            recyclerViewPictures.setOnItemStateListener(object : TvRecyclerView.OnItemStateListener {
+                override fun onItemViewClick(view: View?, position: Int) {
+                    //onPhotoClick(position) TODO restore!
+                }
+
+                override fun onItemViewFocusChanged(gainFocus: Boolean, view: View?, position: Int) {
+                    if(gainFocus) {
+                        onPhotoFocused()
+                    }
+                }
+            })
+            recyclerViewPictures.setSelectPadding(5, 5, 5, 5)
+        }
     }
 
     private var downloadPicturesHandler: Handler? = null
@@ -236,10 +292,10 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             recyclerViewFolders.setItemSelected(0)
             textViewAlbumName.text = actualPath.lastOrNull() ?: gallery.name
 
-            picturesLoader.pictureNotifier.removeObservers(this@GalleryViewActivity)
-            picturesLoader.cancelDownload(true)
+            //picturesLoader.pictureNotifier.removeObservers(this@GalleryViewActivity)
+            //picturesLoader.cancelDownload(true)
 
-            val newPictures = async(Dispatchers.IO) {
+            /*val newPictures = async(Dispatchers.IO) {
                 if(GalleryPreferences.showSubfolders) {
                     val pictures = mutableListOf<MediaFile>()
 
@@ -263,18 +319,36 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                 else {
                     currentFolder.childFiles
                 }
+            }*/
+
+            newPicturesAdapter.clear()
+            withContext(Dispatchers.IO) {
+                galleryContainers.clear()
+                if(GalleryPreferences.showSubfolders) {
+                    //TODO implements
+                } else {
+                    galleryContainers.add(GalleryContainer(currentFolder.name, currentFolderPath, currentFolder.childFiles))
+                    val section = Section()
+                    val test = layoutManager.spanCount
+                    section.setHeader(HeaderItem(currentFolder.name, test))
+                    galleryContainers[0].pictures.map { picture ->
+                        PictureItem(picture, PictureItem.ResLoader(glideManager, picturesMetaCache, this@GalleryViewActivity))
+                    }.run {
+                        section.addAll(this)
+                    }
+                    newPicturesAdapter.add(section)
+                }
             }
 
-            pictures.clear()
-            pictures.addAll(newPictures.await())
-            picturesAdapter.notifyDataSetChanged()
-            picturesLoader.setNewGalleryPath(currentFolderPath)
+            //picturesAdapter.notifyDataSetChanged()
 
-            if(pictures.isEmpty()) {
+            //picturesLoader.setNewGalleryPath(currentFolderPath)
+
+            /*if(pictures.isEmpty()) {
                 return@launch
-            }
+            }*/
 
-            var recyclerViewLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+            /*var recyclerViewLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
             recyclerViewLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
                 recyclerViewPictures.viewTreeObserver.removeOnGlobalLayoutListener(recyclerViewLayoutListener)
                 recyclerViewLayoutListener = null
@@ -283,7 +357,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                 }
                 startDownloadPictures(false)
             }
-            recyclerViewPictures.viewTreeObserver.addOnGlobalLayoutListener(recyclerViewLayoutListener)
+            recyclerViewPictures.viewTreeObserver.addOnGlobalLayoutListener(recyclerViewLayoutListener)*/
         }
     }
 
@@ -341,7 +415,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun onPhotoClick(pos: Int) {
+    /*private fun onPhotoClick(pos: Int) {
         picturesLoader.cancelDownload(false)
         val picturesCacheContainer = picturesMetaCache.snapshot().map { entry ->
             PictureMetaContainer.ParcelablePair(entry.key, entry.value)
@@ -357,9 +431,9 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             val currentPos = result.data?.getIntExtra(FullscreenViewerActivity.CURRENT_PICTURE_KEY, 0) ?: 0
             recyclerViewPictures.setItemSelected(currentPos)
         }
-    }
+    }*/
 
-    private fun startDownloadPictures(withDelay: Boolean) {
+    /*private fun startDownloadPictures(withDelay: Boolean) {
         downloadPicturesHandler?.removeCallbacksAndMessages(null)
         downloadPicturesHandler = null
 
@@ -388,7 +462,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         } else {
             runnable.run()
         }
-    }
+    }*/
 
     private fun onSyncGalleryClick() {
         fun startSync() {

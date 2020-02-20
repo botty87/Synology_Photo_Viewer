@@ -80,7 +80,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
                     equal(MediaFile_.folderId, folderId)
                 }.find()
 
-                picturesMetaCache = CacheMetadata(50, pictures)
+                //picturesMetaCache = CacheMetadata(50, pictures) TODO restore!
                 getParcelableArrayListExtra<PictureMetaContainer.ParcelablePair>(METADATA_CACHE_LIST_KEY)?.forEach { pictureMetaPair ->
                     picturesMetaCache.put(pictureMetaPair.id, pictureMetaPair.pictureMetaContainer)
                 } ?: throw Exception()

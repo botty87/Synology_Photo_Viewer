@@ -6,10 +6,11 @@ import java.util.*
 
 @SuppressLint("SimpleDateFormat")
 object Tools {
-    val standardDateParser : SimpleDateFormat
-        get() = SimpleDateFormat("dd MMM yyyy - HH:mm:ss").apply {
-                timeZone = TimeZone.getTimeZone("UTC")
+    val standardDateParser by lazy {
+        SimpleDateFormat("dd MMM yyyy - HH:mm:ss").apply {
+            timeZone = TimeZone.getTimeZone("UTC")
         }
+    }
 
     /*fun scanGalleries(activity: FragmentActivity, galleryId: Long, mainFolderId: Long = 0, onDone: ((Boolean) -> Unit)? = null) {
         activity.run {

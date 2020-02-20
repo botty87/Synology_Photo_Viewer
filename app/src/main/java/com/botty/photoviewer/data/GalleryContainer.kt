@@ -6,4 +6,7 @@ data class GalleryContainer(
     val name: String,
     val path: String,
     val pictures: List<MediaFile>
-)
+) {
+    val hasNoPics: Boolean
+    get() = pictures.isEmpty()
+}
