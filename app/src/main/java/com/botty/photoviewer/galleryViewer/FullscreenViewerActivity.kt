@@ -1,5 +1,6 @@
 package com.botty.photoviewer.galleryViewer
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
@@ -15,27 +16,26 @@ import androidx.lifecycle.observe
 import androidx.viewpager.widget.ViewPager
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.fullscreenViewer.PicturesAdapter
-import com.botty.photoviewer.data.ObjectBox
+import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
 import com.botty.photoviewer.data.SessionParams
-import com.botty.photoviewer.data.fileStructure.MediaFile
-import com.botty.photoviewer.data.fileStructure.MediaFile_
 import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
+import com.botty.photoviewer.settings.Settings
 import com.botty.photoviewer.tools.*
 import com.bumptech.glide.Glide
 import com.github.florent37.kotlin.pleaseanimate.please
-import io.objectbox.kotlin.query
 import kotlinx.android.synthetic.main.activity_fullscreen_viewer.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 private const val INFO_DELAY = 3000L
 
 class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     companion object {
-        const val FOLDER_ID_KEY = "folder_id"
+        const val PICTURES_LIST_KEY = "pic_list"
         const val METADATA_CACHE_LIST_KEY = "meta_cache"
         const val CURRENT_PICTURE_KEY = "cur_pic"
         const val PICTURE_GALLERY_PATH_KEY = "pic_gallery_path"
@@ -46,7 +46,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     private lateinit var sessionParams: SessionParams
     private lateinit var galleryPath: String
     private lateinit var picturesMetaCache: CacheMetadata
-    private lateinit var pictures: List<MediaFile>
+    private val pictures = mutableListOf<PictureContainer>()
     private var currentPicIndex = 0
 
     private var presentationHandler: Handler? = null
@@ -59,7 +59,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     private val picturesLoader by lazy {
         ViewModelProvider(this,
             PicturesLoader.Factory(sessionParams, glide, pictures,5))
-                .get(PicturesLoader::class.java)
+            .get(PicturesLoader::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,19 +70,10 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
             intent.run {
                 galleryPath = getStringExtra(PICTURE_GALLERY_PATH_KEY) ?: throw Exception()
                 sessionParams = getParcelableExtra(SESSION_PARAMS_KEY) ?: throw Exception()
-                val folderId = getLongExtra(FOLDER_ID_KEY, 0L)
-                if(folderId == 0L) {
-                    finish()
-                    return
-                }
-
-                pictures = ObjectBox.mediaFileBox.query {
-                    equal(MediaFile_.folderId, folderId)
-                }.find()
-
-                //picturesMetaCache = CacheMetadata(50, pictures) TODO restore!
+                pictures.addAll(getParcelableArrayListExtra(PICTURES_LIST_KEY) ?: throw Exception())
+                picturesMetaCache = CacheMetadata(50, pictures)
                 getParcelableArrayListExtra<PictureMetaContainer.ParcelablePair>(METADATA_CACHE_LIST_KEY)?.forEach { pictureMetaPair ->
-                    picturesMetaCache.put(pictureMetaPair.id, pictureMetaPair.pictureMetaContainer)
+                    picturesMetaCache.put(pictureMetaPair.hash, pictureMetaPair.pictureMetaContainer)
                 } ?: throw Exception()
                 currentPicIndex = getIntExtra(CURRENT_PICTURE_KEY, 0)
                 picturesLoader.setNewGalleryPath(galleryPath)
@@ -105,6 +96,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
         }
 
         picturesLoader.startDownload(currentPicIndex)
+        hideInfo()
 
         viewPagerPicture.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {}
@@ -166,10 +158,11 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
                 }
                 viewPagerPicture.currentItem = nextItem
                 startPresentation()
-            }, 5000)
+            }, (Settings.presentationTimeout * 1000L))
         }
     }
 
+    @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
         if(event?.action == KeyEvent.ACTION_DOWN) {
             when (event.keyCode) {
@@ -193,23 +186,25 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     }
 
     private fun setPictureInfo(pos: Int) {
-        cleanInfoHandler()
-        val picture = pictures[pos]
-        runCatching {
-            picturesMetaCache[picture.id]
-        }.onFailure {
-            textViewPictureDate.hide(true)
-        }.onSuccess { picMetaData ->
-            textViewPictureDate.text = dateParser.format(picMetaData.originDate)
-            textViewPictureDate.show()
-        }
-        textViewPictureName.text = picture.name
-        please(100) {
-            animate(layoutInfo) {
-                visible()
+        if(Settings.showPicInfoFullScreen) {
+            cleanInfoHandler()
+            val picture = pictures[pos]
+            runCatching {
+                picturesMetaCache[picture.hashCode]
+            }.onFailure {
+                textViewPictureDate.hide(true)
+            }.onSuccess { picMetaData ->
+                textViewPictureDate.text = dateParser.format(picMetaData.originDate)
+                textViewPictureDate.show()
             }
-        }.start()
-        hideInfo()
+            textViewPictureName.text = picture.name
+            please(100) {
+                animate(layoutInfo) {
+                    visible()
+                }
+            }.start()
+            hideInfo()
+        }
     }
 
     private fun hideInfo() {
@@ -250,7 +245,7 @@ class FullscreenViewerActivity : FragmentActivity(), CoroutineScope by MainScope
     }
 
     private fun findChildViewAdapter(pos: Int = viewPagerPicture.currentItem): View? {
-        val viewId = pictures[pos].id.toInt()
+        val viewId = pictures[pos].hashCode.absoluteValue
         return viewPagerPicture.findViewById(viewId)
     }
 

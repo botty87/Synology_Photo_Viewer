@@ -28,15 +28,9 @@
     <string name="connection_exist">Connection already exist!</string>
     <string name="album">Album</string>
     <string name="loading">Loading…</string>
-    <string name="timeout_or_missing_exception">Timeout or missing picture</string>
-    <string name="galleries_scan_please_wait">Galleries scan, please wait…</string>
-    <string name="scan_completed">Scan completed!</string>
-    <string name="retry_scan">Do you want to retry?</string>
-    <string name="scan_error">Scan error</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="gallery_scan">Gallery scan</string>
-    <string name="do_you_want_scan">Do you want to scan</string>
-    <string name="and_all_subfolders">and all the sub-folders</string>
-    <string name="galleries_scan_generic_error">Something wrong happened on the last galleries scan. Do you want to retry?</string>
+    <string name="timeoutException">Timeout exception</string>
+    <string name="show_picture_info_in_fullscreen_view">Show picture info in fullscreen view</string>
+    <string name="presentation_timeout_in_seconds">Presentation timeout in seconds</string>
+    <string name="active_galleries_click_one_for_remove_it">Active galleries. Click one for remove it.</string>
+    <string name="settings">Settings</string>
 </resources>

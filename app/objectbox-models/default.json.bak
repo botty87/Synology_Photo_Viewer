@@ -117,8 +117,9 @@
         {
           "id": "5:188311699435377756",
           "name": "galleryId",
+          "indexId": "13:924893983388012851",
           "type": 6,
-          "flags": 4
+          "flags": 12
         }
       ],
       "relations": []
@@ -150,15 +151,16 @@
         {
           "id": "5:7889384060086763561",
           "name": "galleryId",
+          "indexId": "14:681280016609658002",
           "type": 6,
-          "flags": 4
+          "flags": 12
         }
       ],
       "relations": []
     }
   ],
   "lastEntityId": "6:8758153863059344589",
-  "lastIndexId": "12:3980411320263521874",
+  "lastIndexId": "14:681280016609658002",
   "lastRelationId": "2:669667728775646517",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

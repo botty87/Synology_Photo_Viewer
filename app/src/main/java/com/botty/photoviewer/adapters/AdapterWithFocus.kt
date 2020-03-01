@@ -30,14 +30,13 @@ abstract class AdapterWithFocus<VH : RecyclerView.ViewHolder>(private val animat
 
         } else {
             if(firstChild is ViewGroup) {
-                val kenBurnsView = firstChild.getChildAt(0)
-                if (kenBurnsView is KenBurnsView) {
+                val childView = firstChild.getChildAt(0)
+                if(childView is KenBurnsView)
                     if (start) {
-                        kenBurnsView.resume()
+                        childView.resume()
                     } else {
-                        kenBurnsView.pause()
+                        childView.pause()
                     }
-                }
             }
         }
     }

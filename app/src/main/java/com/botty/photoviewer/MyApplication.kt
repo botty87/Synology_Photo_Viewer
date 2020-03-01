@@ -5,7 +5,6 @@ import android.content.res.Resources
 import com.botty.photoviewer.data.ObjectBox
 import io.objectbox.android.AndroidObjectBrowser
 import android.util.Log
-import com.chibatching.kotpref.Kotpref
 import com.crashlytics.android.Crashlytics
 import timber.log.Timber
 import timber.log.Timber.DebugTree
@@ -21,7 +20,6 @@ class MyApplication: Application() {
         super.onCreate()
         myResources = resources
         ObjectBox.init(this)
-        Kotpref.init(this)
         if (BuildConfig.DEBUG) {
             Timber.plant(DebugTree())
             val started = AndroidObjectBrowser(ObjectBox.boxStore).start(this)

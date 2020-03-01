@@ -4,10 +4,9 @@ import android.util.SparseArray
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.botty.photoviewer.data.GalleryContainer
 import com.botty.photoviewer.data.JobDownloadStatus
+import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.SessionParams
-import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.tools.*
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.request.FutureTarget
@@ -18,15 +17,19 @@ import java.util.concurrent.ExecutionException
 
 class PicturesLoader private constructor(private val sessionParams: SessionParams,
                                          private val glide: RequestManager,
-                                         private val galleryContainer: GalleryContainer,
+                                         private val pictures: List<PictureContainer>,
                                          private val preloadSize: Int) : ViewModel() {
 
     val pictureNotifier = PictureNotifier()
 
-    /*fun setNewGalleryPath(galleryPath: String) {
+    private var galleryPath: String? = null
+
+    private val debugTag = "ldpic -"
+
+    fun setNewGalleryPath(galleryPath: String) {
         cancelDownload(false)
         this.galleryPath = galleryPath
-    }*/
+    }
 
     private var downloadPictureJobs = SparseArray<Job>(preloadSize)
     private var downloadPictureFutureTargets = SparseArray<FutureTarget<File>>(preloadSize)
@@ -39,11 +42,11 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
 
     fun startDownload(firstIndex: Int, lastIndex: Int) {
         activeWorkingJob?.cancel()
-        if(galleryContainer.hasNoPics) {
+        if(pictures.isEmpty()) {
             return
         }
         activeWorkingJob = viewModelScope.launch(Dispatchers.Default) {
-            Timber.d("$DEBUG_TAG start download")
+            Timber.d("$debugTag start download")
             currentDownloadStatus = JobDownloadStatus.CURRENT_PIC
 
             if(downloadPictureJobs.isNotEmpty()) {
@@ -75,7 +78,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
 
             for (picIndex in firstIndex..lastIndex) {
                 if (downloadPictureJobs[picIndex] == null) {
-                    Timber.d("$DEBUG_TAG start $picIndex")
+                    Timber.d("$debugTag start $picIndex")
                     viewModelScope.launch {
                         downloadAndNotify(picIndex)
                     }.let { job ->
@@ -85,43 +88,14 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
                         }
                     }
                 } else {
-                    Timber.d("$DEBUG_TAG skip $picIndex")
+                    Timber.d("$debugTag skip $picIndex")
                 }
             }
         }
     }
 
     private suspend fun downloadAndNotify(picIndex: Int) = withContext(Dispatchers.IO) {
-        galleryContainer.runCatching {
-            if (pictures[picIndex].file?.notExists() != false) {
-                val picFullPath =
-                    sessionParams.getPicFullPath(path, pictures[picIndex].name)
-                glide
-                    .asFile()
-                    .load(picFullPath)
-                    .submit()
-                    .apply {
-                        downloadPictureFutureTargets.append(picIndex, this)
-                    }.get()
-                    .let { picFile ->
-                        pictures[picIndex].file = picFile
-                        pictureNotifier.postValue(picIndex)
-                        Timber.d("$DEBUG_TAG pic $picIndex downloaded")
-                    }
-            }
-        }.onFailure { e ->
-            if(e is ExecutionException) {
-                galleryContainer.pictures[picIndex].run {
-                    file = null
-                    executionException = true
-                }
-                pictureNotifier.postValue(picIndex)
-            } else {
-                e.log()
-            }
-        }
-
-        /*try {
+        try {
             if (pictures[picIndex].file?.notExists() != false) {
                 val picFullPath =
                     sessionParams.getPicFullPath(galleryPath!!, pictures[picIndex].name)
@@ -135,7 +109,7 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
                     .let { picFile ->
                         pictures[picIndex].file = picFile
                         pictureNotifier.postValue(picIndex)
-                        Timber.d("$DEBUG_TAG pic $picIndex downloaded")
+                        Timber.d("$debugTag pic $picIndex downloaded")
                     }
             }
         } catch (e: NullPointerException) {
@@ -144,17 +118,15 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
             e.log()
             pictures[picIndex].run {
                 file = null
-                executionException = true
+                timeoutException = true
             }
             pictureNotifier.postValue(picIndex)
-        } catch (e: ArrayIndexOutOfBoundsException) {
-            e.log()
-        }*/
+        }
     }
 
     private fun downloadPreviousPictures(firstIndex: Int, lastIndex: Int) {
         activeWorkingJob = viewModelScope.launch(Dispatchers.Default) {
-            if (galleryContainer.hasNoPics || firstIndex == 0) {
+            if (pictures.isEmpty() || firstIndex == 0) {
                 currentDownloadStatus = JobDownloadStatus.NO_WORK
                 return@launch
             }
@@ -184,34 +156,32 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
     private fun downloadNextPictures(firstIndex: Int, lastIndex: Int) {
         activeWorkingJob = viewModelScope.launch(Dispatchers.Default) {
             currentDownloadStatus = JobDownloadStatus.NEXT_PIC
-            galleryContainer.run {
-                when{
-                    pictures.isEmpty() -> {
-                        currentDownloadStatus = JobDownloadStatus.NO_WORK
-                        return@launch
-                    }
-
-                    lastIndex == pictures.size - 1 -> {
-                        downloadPreviousPictures(firstIndex, lastIndex)
-                        return@launch
-                    }
+            when{
+                pictures.isEmpty() -> {
+                    currentDownloadStatus = JobDownloadStatus.NO_WORK
+                    return@launch
                 }
 
-                val startPosition = lastIndex + 1
-                var endPos = lastIndex + preloadSize
-                if (endPos >= pictures.size) {
-                    endPos = pictures.size - 1
+                lastIndex == pictures.size - 1 -> {
+                    downloadPreviousPictures(firstIndex, lastIndex)
+                    return@launch
                 }
+            }
 
-                for (picIndex in startPosition..endPos) {
-                    if (downloadPictureJobs[picIndex] == null) {
-                        viewModelScope.launch {
-                            downloadAndNotify(picIndex)
-                        }.let { job ->
-                            downloadPictureJobs.append(picIndex, job)
-                            job.invokeOnCompletion {
-                                onJobCompletion(picIndex, firstIndex, lastIndex)
-                            }
+            val startPosition = lastIndex + 1
+            var endPos = lastIndex + preloadSize
+            if (endPos >= pictures.size) {
+                endPos = pictures.size - 1
+            }
+
+            for (picIndex in startPosition..endPos) {
+                if (downloadPictureJobs[picIndex] == null) {
+                    viewModelScope.launch {
+                        downloadAndNotify(picIndex)
+                    }.let { job ->
+                        downloadPictureJobs.append(picIndex, job)
+                        job.invokeOnCompletion {
+                            onJobCompletion(picIndex, firstIndex, lastIndex)
                         }
                     }
                 }
@@ -259,14 +229,10 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
     @Suppress("UNCHECKED_CAST")
     class Factory(private val sessionParams: SessionParams,
                   private val glide: RequestManager,
-                  private val galleryContainer: GalleryContainer,
+                  private val pictures: List<PictureContainer>,
                   private val preloadSize: Int): ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return PicturesLoader(sessionParams, glide, galleryContainer, preloadSize) as T
+            return PicturesLoader(sessionParams, glide, pictures, preloadSize) as T
         }
-    }
-
-    companion object {
-        private const val DEBUG_TAG = "ldpic -"
     }
 }

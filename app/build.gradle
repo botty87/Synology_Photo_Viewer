@@ -6,22 +6,22 @@ apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "botty.synology.photoviewer"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 9
-        versionName "1.1-beta1"
+        versionCode 13
+        versionName "1.1-beta2"
     }
     buildTypes {
         release {
-            manifestPlaceholders = [enableCrashReporting: "true"]
+            manifestPlaceholders = [enableCrashReporting:"true"]
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            manifestPlaceholders = [enableCrashReporting: "false"]
+            manifestPlaceholders = [enableCrashReporting:"false"]
         }
     }
     compileOptions {
@@ -57,8 +57,8 @@ dependencies {
     implementation 'com.github.florent37:inline-activity-result-kotlin:1.0.3'
     implementation 'com.afollestad.material-dialogs:core:3.1.1'
     implementation 'com.afollestad.material-dialogs:input:3.1.1'
-    implementation 'com.github.bumptech.glide:glide:4.10.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    kapt 'com.github.bumptech.glide:compiler:4.11.0'
     implementation 'com.github.bumptech.glide:recyclerview-integration:4.10.0'
     implementation 'com.github.florent37:diagonallayout:1.1.1'
     implementation 'com.flaviofaria:kenburnsview:1.0.7'
@@ -66,17 +66,13 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
     implementation 'com.jakewharton.timber:timber:4.7.1'
-    implementation 'androidx.work:work-runtime-ktx:2.3.0'
+    implementation 'androidx.work:work-runtime-ktx:2.3.2'
     implementation 'com.drewnoakes:metadata-extractor:2.12.0'
-    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:17.2.3'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     implementation 'com.chibatching.kotpref:kotpref:2.10.0'
-    implementation 'com.google.android:flexbox:2.0.1'
-    implementation 'com.agrawalsuneet.androidlibs:loaderspack:1.2.3'
-
-    implementation "com.xwray:groupie:2.7.0"
-    implementation "com.xwray:groupie-kotlin-android-extensions:2.7.0"
+    implementation 'com.chibatching.kotpref:initializer:2.10.0'
 }
 
-apply plugin: 'io.objectbox'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.objectbox'

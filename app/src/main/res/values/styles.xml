@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="@style/Theme.Leanback" >
-        <item name="md_background_color">@android:color/holo_orange_dark</item>
-        <item name="md_ripple_color">@android:color/holo_blue_dark</item>
-        <item name="md_color_button_text">@android:color/white</item>
-    </style>
+    <style name="AppTheme" parent="@style/Theme.Leanback" />
 </resources>

@@ -1,31 +1,27 @@
 package com.botty.photoviewer.data
 
-import com.botty.photoviewer.data.fileStructure.MediaFolder
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.relation.ToOne
 
 @Entity
 data class Gallery(var name: String, var path: String,
-                   var headerToSet: Boolean = true, @Id var id: Long = 0) {
+              var headerToSet: Boolean = true, @Id var id: Long = 0) {
 
-    constructor(name: String, path: String, headerToSet: Boolean = true, id: Long = 0,
-                connectionParamsId: Long, folderId: Long) :
+    constructor(name: String, path: String, headerToSet: Boolean = true, id: Long = 0, connectionParamsId: Long) :
             this(name, path, headerToSet, id) {
         connectionParams.targetId = connectionParamsId
-        folder.targetId = folderId
     }
 
     lateinit var connectionParams: ToOne<ConnectionParams>
-    lateinit var folder: ToOne<MediaFolder>
 
     override fun equals(other: Any?): Boolean {
         return if(other is Gallery) {
             this.name == other.name &&
-                    this.path == other.path &&
-                    this.headerToSet == other.headerToSet &&
-                    this.id == other.id &&
-                    this.connectionParams.targetId == other.connectionParams.targetId
+            this.path == other.path &&
+            this.headerToSet == other.headerToSet &&
+            this.id == other.id &&
+            this.connectionParams.targetId == other.connectionParams.targetId
         } else{
             false
         }

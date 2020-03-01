@@ -1,31 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/gallery_width"
     android:layout_height="@dimen/gallery_height"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:focusable="true"
-    android:focusableInTouchMode="true"
     card_view:cardBackgroundColor="@android:color/white"
     card_view:cardCornerRadius="7dp"
     card_view:cardElevation="10dp"
     android:orientation="vertical">
 
-    <com.flaviofaria.kenburnsview.KenBurnsView
-        android:id="@+id/imageViewGallery"
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="140dp"
+        android:src="@drawable/ic_settings_140dp"/>
 
     <TextView
-        android:id="@+id/textViewPhotoName"
         android:layout_width="match_parent"
         android:layout_height="30dp"
         android:layout_gravity="bottom"
-        android:gravity="left"
+        android:gravity="right"
         android:textSize="20sp"
         android:maxLines="1"
-        android:paddingLeft="7dp"
-        android:background="@drawable/gallery_name_background"
-        android:textColor="@android:color/white" />
+        android:paddingRight="7dp"
+        android:textColor="@android:color/black"
+        android:text="@string/settings"/>
 
 </androidx.cardview.widget.CardView>
