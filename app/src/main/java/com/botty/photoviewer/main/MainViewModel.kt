@@ -11,6 +11,6 @@ import io.objectbox.kotlin.query
 class MainViewModel : ViewModel() {
     val galleriesLiveData by lazy {
         val query = ObjectBox.galleryBox.query { order(Gallery_.name) }
-        ObjectBoxLiveData<Gallery>(query)
+        ObjectBoxLiveData(query)
     }
 }
