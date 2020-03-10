@@ -25,6 +25,10 @@
         android:theme="@style/AppTheme"
         tools:replace="android:supportsRtl,android:allowBackup">
 
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9694877750002081~5509085931"/>
+
         <meta-data android:name="firebase_crashlytics_collection_enabled"
             android:value="${enableCrashReporting}" />
 

@@ -11,6 +11,7 @@ import com.botty.photoviewer.data.Gallery
 import com.botty.photoviewer.galleryViewer.GalleryViewActivity
 import com.botty.photoviewer.settings.SettingsActivity
 import com.botty.photoviewer.tools.GridAutofitLayoutManager
+import com.botty.photoviewer.tools.loadAdWithFailListener
 import com.botty.photoviewer.tools.network.Network
 import com.botty.photoviewer.tools.startActivity
 import com.bumptech.glide.Glide
@@ -36,6 +37,7 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        adView.loadAdWithFailListener()
         loadGalleries()
     }
 

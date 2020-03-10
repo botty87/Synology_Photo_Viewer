@@ -6,6 +6,7 @@ import com.botty.photoviewer.data.ObjectBox
 import io.objectbox.android.AndroidObjectBrowser
 import android.util.Log
 import com.crashlytics.android.Crashlytics
+import com.google.android.gms.ads.MobileAds
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 
@@ -20,6 +21,8 @@ class MyApplication: Application() {
         super.onCreate()
         myResources = resources
         ObjectBox.init(this)
+        //ca-app-pub-3940256099942544~3347511713 TEST
+        MobileAds.initialize(this, "ca-app-pub-9694877750002081~5509085931")
         if (BuildConfig.DEBUG) {
             Timber.plant(DebugTree())
             val started = AndroidObjectBrowser(ObjectBox.boxStore).start(this)

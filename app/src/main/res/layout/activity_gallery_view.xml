@@ -83,11 +83,28 @@
         app:focusDrawable="@drawable/picture_selected_background"
         app:scrollMode="alignScroll"
         android:scrollbars="none"
-        android:paddingBottom="15dp"
+        android:paddingBottom="75dp"
         android:paddingTop="15dp"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         android:clipToPadding="false"/>
+
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        ads:layout_constraintBottom_toBottomOf="parent"
+        ads:layout_constraintRight_toRightOf="parent"
+        ads:layout_constraintLeft_toRightOf="@id/viewGuide"
+        ads:adSize="FULL_BANNER"
+        ads:adUnitId="ca-app-pub-9694877750002081/6277234515" />
+
+    <!-- ca-app-pub-9694877750002081/6277234515 release -->
+
+    <!-- ca-app-pub-3940256099942544/6300978111 TEST -->
 
     <ProgressBar
         android:id="@+id/progressPicturesLoader"

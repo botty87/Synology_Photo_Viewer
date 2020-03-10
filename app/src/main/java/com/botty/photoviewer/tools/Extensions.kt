@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import com.github.florent37.inlineactivityresult.Result
 import com.github.florent37.inlineactivityresult.kotlin.KotlinActivityResult
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 import es.dmoral.toasty.Toasty
 import timber.log.Timber
 import java.io.File
@@ -134,4 +137,15 @@ fun String.endsWithNoCase(suffix: String) = this.endsWith(suffix, true)
 
 fun Handler?.removeAll() {
     this?.removeCallbacksAndMessages(null)
+}
+
+fun AdView.loadAdWithFailListener() {
+    AdRequest.Builder().build().let { req ->
+        this.loadAd(req)
+        this.adListener = object: AdListener() {
+            override fun onAdFailedToLoad(errorCode : Int) {
+                LoadAdException(errorCode).log()
+            }
+        }
+    }
 }

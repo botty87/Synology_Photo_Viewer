@@ -112,6 +112,8 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
                         Timber.d("$debugTag pic $picIndex downloaded")
                     }
             }
+        } catch(e: ArrayIndexOutOfBoundsException) {
+            e.log()
         } catch (e: NullPointerException) {
             e.log()
         } catch (e: ExecutionException) {

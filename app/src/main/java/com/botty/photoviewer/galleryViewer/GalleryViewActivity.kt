@@ -136,6 +136,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gallery_view)
+        adView.loadAdWithFailListener()
         val galleryId = savedInstanceState?.getLong(Gallery.ID_TAG, 0L) ?:
         intent.getLongExtra(Gallery.ID_TAG, 0L)
 
@@ -246,7 +247,13 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                     //Sometimes it could happens. In case go next
                     e.log()
                 }
-                recyclerViewFolders.setItemSelected(0)
+                runCatching {
+                    recyclerViewFolders.setItemSelected(0)
+                    recyclerViewFolders.getChildAt(0)?.requestFocus()
+                    recyclerViewPictures.setItemSelected(-1)
+                }.onFailure { e ->
+                    e.log()
+                }
                 hideLoader()
                 Handler().postDelayed({
                     falsePhotoFocused = true
@@ -313,6 +320,9 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                     outOfScreen(Gravity.LEFT)
                     alpha(0.1f)
                 }
+                animate(adView) {
+                    centerHorizontalInParent()
+                }
             }.withStartAction {
                 recyclerViewFolders.mFocusBorderView?.drawBorder = false
                 viewGuide.requestFocus()
@@ -337,6 +347,9 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
                 }
                 animate(recyclerViewPictures) {
                     rightOf(viewGuide)
+                }
+                animate(adView) {
+                    originalPosition()
                 }
             }.withEndAction {
                 recyclerViewFolders.mFocusBorderView?.drawBorder = true
