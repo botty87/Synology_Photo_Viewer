@@ -1,14 +1,14 @@
 package com.botty.photoviewer.data
 
 import android.os.Parcelable
-import com.botty.photoviewer.tools.DateParceler
+import com.botty.photoviewer.components.DateParceler
 import com.drew.imaging.ImageMetadataReader
 import com.drew.metadata.exif.ExifIFD0Directory
 import com.drew.metadata.exif.ExifSubIFDDirectory
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.TypeParceler
 import java.io.File
-import java.util.Date
+import java.util.*
 
 @Parcelize
 @TypeParceler<Date, DateParceler>

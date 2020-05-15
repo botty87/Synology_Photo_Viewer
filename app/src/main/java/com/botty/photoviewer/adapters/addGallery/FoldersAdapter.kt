@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.AdapterWithFocus
 import com.botty.photoviewer.adapters.GenericHolder
-import com.botty.photoviewer.tools.network.responses.containers.Share
+import com.botty.photoviewer.components.network.responses.containers.Share
 import kotlinx.android.synthetic.main.folder_item.view.*
 
 class FoldersAdapter : AdapterWithFocus<GenericHolder>() {

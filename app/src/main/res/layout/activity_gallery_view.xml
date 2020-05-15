@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="false"
     android:focusable="false"
-    tools:context=".galleryViewer.GalleryViewActivity">
+    tools:context=".galleryViewer.galleryView.GalleryViewActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/navDetailsLayout"
@@ -50,7 +50,7 @@
                 android:textColor="@android:color/white"
                 android:textStyle="bold"/>
 
-            <com.botty.photoviewer.tools.ScrollTextView
+            <com.botty.photoviewer.components.ScrollTextView
                 android:id="@+id/textViewAlbumName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

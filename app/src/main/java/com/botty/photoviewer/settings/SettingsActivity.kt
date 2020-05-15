@@ -5,12 +5,19 @@ import android.view.View
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.settings.GalleriesAdapter
 import com.botty.tvrecyclerview.TvRecyclerView
 import kotlinx.android.synthetic.main.activity_settings.*
+import kotlinx.android.synthetic.main.remove_gallery_dialog.view.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : FragmentActivity() {
+
+    private val viewModel: SettingsActivityViewModel by viewModel()
 
     private val galleriesAdapter by lazy {
         recyclerViewGalleries.setHasFixedSize(true)
@@ -20,10 +27,21 @@ class SettingsActivity : FragmentActivity() {
             addItemDecoration(DividerItemDecoration(this@SettingsActivity, DividerItemDecoration.VERTICAL))
             setSelectPadding(5, 0, 5, 0)
         }
-        GalleriesAdapter().apply {
+
+        GalleriesAdapter(viewModel.galleries, this).apply {
             recyclerViewGalleries.setOnItemStateListener(object : TvRecyclerView.OnItemStateListener {
                 override fun onItemViewClick(view: View?, position: Int) {
-                    removeGallery(position)
+                    //Ask before to remove
+                    MaterialDialog(this@SettingsActivity).show {
+                        customView(R.layout.remove_gallery_dialog)
+                        getCustomView().run {
+                            buttonNo.setOnClickListener { dismiss() }
+                            buttonYes.setOnClickListener {
+                                viewModel.removeGallery(position)
+                                dismiss()
+                            }
+                        }
+                    }
                 }
 
                 override fun onItemViewFocusChanged(gainFocus: Boolean, view: View?, position: Int) {}
@@ -35,12 +53,12 @@ class SettingsActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        checkboxShowPictureInfo.isChecked = Settings.showPicInfoFullScreen
+        checkboxShowPictureInfo.isChecked = viewModel.showPicInfoFullScreen
         checkboxShowPictureInfo.setOnCheckedChangeListener { _, checked ->
-            Settings.showPicInfoFullScreen = checked
+            viewModel.showPicInfoFullScreen = checked
         }
 
-        editTextPresentationTimeout.setText(Settings.presentationTimeout.toString())
+        editTextPresentationTimeout.setText(viewModel.presentationTimeout.toString())
 
         recyclerViewGalleries.adapter = galleriesAdapter
     }
@@ -49,7 +67,7 @@ class SettingsActivity : FragmentActivity() {
         runCatching {
             editTextPresentationTimeout.text.toString().toInt()
         }.onSuccess { seconds ->
-            if(seconds > 0) Settings.presentationTimeout = seconds
+            if(seconds > 0) viewModel.presentationTimeout = seconds
         }
         super.onStop()
     }

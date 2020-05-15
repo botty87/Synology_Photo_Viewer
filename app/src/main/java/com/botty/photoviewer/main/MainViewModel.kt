@@ -1,15 +1,11 @@
 package com.botty.photoviewer.main
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import com.botty.photoviewer.data.Gallery_
-import com.botty.photoviewer.data.ObjectBox
-import io.objectbox.android.ObjectBoxLiveData
-import io.objectbox.kotlin.query
+import com.botty.photoviewer.data.Gallery
+import com.botty.photoviewer.di.repos.GalleriesRepo
 
 
-class MainViewModel : ViewModel() {
-    val galleriesLiveData by lazy {
-        val query = ObjectBox.galleryBox.query { order(Gallery_.name) }
-        ObjectBoxLiveData(query)
-    }
+class MainViewModel(galleriesRepo: GalleriesRepo) : ViewModel() {
+    val galleries: LiveData<List<Gallery>> = galleriesRepo.galleries
 }

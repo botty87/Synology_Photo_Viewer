@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.DiffUtil
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.AdapterWithFocus
 import com.botty.photoviewer.adapters.GenericHolder
+import com.botty.photoviewer.components.get
+import com.botty.photoviewer.components.size
 import com.botty.photoviewer.data.Gallery
-import com.botty.photoviewer.tools.get
-import com.botty.photoviewer.tools.size
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.add_gallery_item.view.*
 import kotlinx.android.synthetic.main.gallery_item.view.*

@@ -2,15 +2,22 @@ package com.botty.photoviewer
 
 import android.app.Application
 import android.content.res.Resources
-import com.botty.photoviewer.data.ObjectBox
-import io.objectbox.android.AndroidObjectBrowser
 import android.util.Log
+import com.botty.photoviewer.data.db.ObjectBox
+import com.botty.photoviewer.di.*
 import com.crashlytics.android.Crashlytics
 import com.google.android.gms.ads.MobileAds
+import io.objectbox.android.AndroidObjectBrowser
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.KoinComponent
+import org.koin.core.context.startKoin
+import org.koin.core.get
+import org.koin.core.qualifier.named
 import timber.log.Timber
 import timber.log.Timber.DebugTree
 
-class MyApplication: Application() {
+class MyApplication: Application(), KoinComponent {
     companion object {
         private lateinit var myResources: Resources
 
@@ -20,12 +27,23 @@ class MyApplication: Application() {
     override fun onCreate() {
         super.onCreate()
         myResources = resources
-        ObjectBox.init(this)
-        //ca-app-pub-3940256099942544~3347511713 TEST
-        MobileAds.initialize(this, "ca-app-pub-9694877750002081~5509085931")
+
+        startKoin{
+            androidLogger()
+            androidContext(this@MyApplication)
+            modules(
+                appModule,
+                viewModelsModule,
+                networkModule,
+                dbModule,
+                scopedModules
+            )
+        }
+
+        MobileAds.initialize(this, get<String>(named(ADS_ID))) //TODO resolve with di
         if (BuildConfig.DEBUG) {
             Timber.plant(DebugTree())
-            val started = AndroidObjectBrowser(ObjectBox.boxStore).start(this)
+            val started = AndroidObjectBrowser(get<ObjectBox>().boxStore).start(this)
             Timber.i("ObjectBrowser Started: $started")
         } else {
             Timber.plant(CrashReportingTree())

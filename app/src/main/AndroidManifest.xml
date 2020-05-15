@@ -32,8 +32,8 @@
         <meta-data android:name="firebase_crashlytics_collection_enabled"
             android:value="${enableCrashReporting}" />
 
-        <activity android:name=".galleryViewer.FullscreenViewerActivity" />
-        <activity android:name=".galleryViewer.GalleryViewActivity" />
+        <activity android:name=".galleryViewer.fullscreenView.FullscreenViewerActivity" />
+        <activity android:name=".galleryViewer.galleryView.GalleryViewActivity" />
         <activity android:name=".addGallery.AddShareActivity" />
         <activity android:name=".settings.SettingsActivity" />
         <activity

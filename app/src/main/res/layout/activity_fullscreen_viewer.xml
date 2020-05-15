@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".galleryViewer.FullscreenViewerActivity">
+    tools:context=".galleryViewer.fullscreenView.FullscreenViewerActivity">
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPagerPicture"

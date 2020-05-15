@@ -9,24 +9,28 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
+import com.botty.photoviewer.components.Tools
+import com.botty.photoviewer.components.clear
+import com.botty.photoviewer.components.glide.GlideTools
+import com.botty.photoviewer.components.showErrorToast
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.galleryViewer.CacheMetadata
-import com.botty.photoviewer.tools.Tools
-import com.botty.photoviewer.tools.clear
-import com.botty.photoviewer.tools.glide.GlideTools
-import com.botty.photoviewer.tools.showErrorToast
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_item.view.*
+import org.koin.core.KoinComponent
+import org.koin.core.get
 
 
-class PicturesAdapter(private val glideManager: RequestManager,
-                      private val pictureMetaCache: CacheMetadata,
-                      private val picturesList: List<PictureContainer>,
-                      private val context: Context) : RecyclerView.Adapter<GenericHolder>() {
+class PicturesAdapter(private val pictureMetaCache: CacheMetadata,
+                      private val context: Context) : RecyclerView.Adapter<GenericHolder>(), KoinComponent {
+
+    private val glideManager: RequestManager = get()
+
+    private var picturesList: List<PictureContainer>? = null
 
     private val dateParser = Tools.standardDateParser
 
-    override fun getItemCount() = picturesList.size
+    override fun getItemCount() = picturesList?.size ?: 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericHolder {
         return LayoutInflater.from(parent.context).inflate(R.layout.picture_item, parent, false)
@@ -35,7 +39,7 @@ class PicturesAdapter(private val glideManager: RequestManager,
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: GenericHolder, position: Int) {
-        val picture = picturesList[holder.adapterPosition]
+        val picture = picturesList!![holder.adapterPosition]
         when {
             picture.file?.exists() == true -> {
                 val metaCacheId = picture.hashCode
@@ -72,18 +76,23 @@ class PicturesAdapter(private val glideManager: RequestManager,
                 }.let {prog ->
                     holder.itemView.imageViewPicture.setImageDrawable(prog)
                 }
-                picturesList[holder.adapterPosition].file = null
+                picturesList!![holder.adapterPosition].file = null
             }
         }
 
         holder.itemView.textViewName.text = picture.name
     }
 
-    override fun getItemId(position: Int): Long = picturesList[position].hashCode.toLong()
+    override fun getItemId(position: Int): Long = picturesList!![position].hashCode.toLong()
 
     override fun onViewRecycled(holder: GenericHolder) {
         glideManager.clear(holder.itemView.imageViewPicture)
         holder.itemView.textViewDate.clear()
         super.onViewRecycled(holder)
+    }
+
+    fun setNewPictures(pictures: List<PictureContainer>) {
+        this.picturesList = pictures
+        notifyDataSetChanged()
     }
 }

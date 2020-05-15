@@ -1,5 +1,6 @@
 package com.botty.photoviewer.data
 
+import com.botty.photoviewer.data.connectionContainers.ConnectionParams
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.relation.ToOne

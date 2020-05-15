@@ -8,19 +8,21 @@ import android.view.ViewGroup
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import androidx.viewpager.widget.PagerAdapter
 import com.botty.photoviewer.R
+import com.botty.photoviewer.components.glide.GlideTools
 import com.botty.photoviewer.data.PictureContainer
 import com.botty.photoviewer.data.PictureMetaContainer
-import com.botty.photoviewer.tools.glide.GlideTools
-import com.botty.photoviewer.tools.showErrorToast
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_fullscreen_item.view.*
+import org.koin.core.KoinComponent
+import org.koin.core.get
 import kotlin.math.absoluteValue
 
 class PicturesAdapter(
     private val pictures: List<PictureContainer>,
-    private val glide: RequestManager,
     private val context: Context)
-    : PagerAdapter() {
+    : PagerAdapter(), KoinComponent {
+
+    private val glide: RequestManager = get()
 
     override fun isViewFromObject(view: View, `object`: Any) = view == `object`
     override fun getCount() = pictures.size
@@ -48,18 +50,18 @@ class PicturesAdapter(
                 GlideTools.loadImageIntoView(glide, containerView.imageViewPicture, picture, context)
             }
 
-            picture.timeoutException -> {
+            /*picture.timeoutException -> {
                 GlideTools.setErrorImage(glide, containerView.imageViewPicture)
-                context.showErrorToast(R.string.timeoutException)
-            }
+                context.showErrorToast(R.string.timeoutException) TODO review!
+            }*/
 
             else -> CircularProgressDrawable(context).apply {
                 strokeWidth = 5f
                 centerRadius = 30f
                 this.setColorSchemeColors(Color.RED)
                 start()
-            }.let {prog ->
-                containerView.imageViewPicture.setImageDrawable(prog)
+            }.let {progress ->
+                containerView.imageViewPicture.setImageDrawable(progress)
             }
         }
     }

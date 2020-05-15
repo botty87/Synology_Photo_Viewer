@@ -1,46 +1,72 @@
 package com.botty.photoviewer.galleryViewer.loader
 
+import android.os.Handler
 import android.util.SparseArray
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.botty.photoviewer.components.*
 import com.botty.photoviewer.data.JobDownloadStatus
 import com.botty.photoviewer.data.PictureContainer
-import com.botty.photoviewer.data.SessionParams
-import com.botty.photoviewer.tools.*
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.request.FutureTarget
 import kotlinx.coroutines.*
+import org.koin.core.KoinComponent
 import timber.log.Timber
 import java.io.File
 import java.util.concurrent.ExecutionException
 
-class PicturesLoader private constructor(private val sessionParams: SessionParams,
-                                         private val glide: RequestManager,
-                                         private val pictures: List<PictureContainer>,
-                                         private val preloadSize: Int) : ViewModel() {
 
+private const val preloadSize: Int = 10
+
+class PicturesLoader (private val glide: RequestManager,
+                      private val gallCont: GalleryContainer) : ViewModel(), KoinComponent {
+
+    //private val sessionParams = dataContainer.sessionParams
+    private val pictures: List<PictureContainer>
+        get() = gallCont.pictures.value!!
+
+    private var downloadPicturesHandler: Handler? = null
     val pictureNotifier = PictureNotifier()
 
-    private var galleryPath: String? = null
+    //private var galleryPath: String? = null
 
     private val debugTag = "ldpic -"
 
-    fun setNewGalleryPath(galleryPath: String) {
-        cancelDownload(false)
-        this.galleryPath = galleryPath
-    }
+    //TODO refactory
+    /*fun setNewGalleryPath(galleryPath: String) {
+        //cancelDownload(false)
+        cancelDownload()
+        //this.galleryPath = galleryPath
+    }*/
 
     private var downloadPictureJobs = SparseArray<Job>(preloadSize)
     private var downloadPictureFutureTargets = SparseArray<FutureTarget<File>>(preloadSize)
     private var activeWorkingJob: Job? = null
     @Volatile private var currentDownloadStatus = JobDownloadStatus.NO_WORK
 
-    fun startDownload(currentIndex: Int) {
+    /*fun startDownload(currentIndex: Int) {
         startDownload(currentIndex, currentIndex)
+    }*/
+
+    fun startDownload(firstIndex: Int, lastIndex: Int = firstIndex, withDelay: Boolean = false) {
+        downloadPicturesHandler?.removeCallbacksAndMessages(null)
+        downloadPicturesHandler = null
+
+        val runnable = Runnable {
+            startDownload(firstIndex, lastIndex)
+            downloadPicturesHandler = null
+        }
+
+        if(withDelay) {
+            downloadPicturesHandler = Handler().apply {
+                postDelayed( runnable,700)
+            }
+        } else {
+            runnable.run()
+        }
     }
 
-    fun startDownload(firstIndex: Int, lastIndex: Int) {
+    private fun startDownload(firstIndex: Int, lastIndex: Int) {
         activeWorkingJob?.cancel()
         if(pictures.isEmpty()) {
             return
@@ -98,7 +124,8 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
         try {
             if (pictures[picIndex].file?.notExists() != false) {
                 val picFullPath =
-                    sessionParams.getPicFullPath(galleryPath!!, pictures[picIndex].name)
+                    //gallCont.network.getPictureUrl(galleryPath!!, pictures[picIndex].name)
+                    gallCont.network.getPictureUrl(gallCont.currentGalleryPath, pictures[picIndex].name)
                 glide
                     .asFile()
                     .load(picFullPath)
@@ -211,13 +238,15 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
         }
     }
 
-    fun cancelDownload(clearAll: Boolean) {
+    fun cancelDownload() {
         currentDownloadStatus = JobDownloadStatus.NO_WORK
         activeWorkingJob?.cancel()
         activeWorkingJob = null
-        if(clearAll) {
+
+        //TODO verify clearall
+        /*if(clearAll) {
             galleryPath = null
-        }
+        }*/
 
         downloadPictureFutureTargets.forEach { target ->
             target?.cancel(true)
@@ -228,13 +257,12 @@ class PicturesLoader private constructor(private val sessionParams: SessionParam
         downloadPictureJobs.clear()
     }
 
-    @Suppress("UNCHECKED_CAST")
-    class Factory(private val sessionParams: SessionParams,
+    /*@Suppress("UNCHECKED_CAST")
+    class Factory(private val dataContainer: DataContainer,
                   private val glide: RequestManager,
-                  private val pictures: List<PictureContainer>,
                   private val preloadSize: Int): ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return PicturesLoader(sessionParams, glide, pictures, preloadSize) as T
+            return PicturesLoader(dataContainer, glide, preloadSize) as T
         }
-    }
+    }*/
 }

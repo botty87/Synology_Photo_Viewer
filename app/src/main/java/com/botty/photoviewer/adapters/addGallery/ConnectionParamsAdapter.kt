@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
-import com.botty.photoviewer.data.ConnectionParams
-import com.botty.photoviewer.tools.get
-import com.botty.photoviewer.tools.size
+import com.botty.photoviewer.components.get
+import com.botty.photoviewer.components.size
+import com.botty.photoviewer.data.connectionContainers.ConnectionParams
 import kotlinx.android.synthetic.main.connection_item.view.*
 
 class ConnectionParamsAdapter : RecyclerView.Adapter<GenericHolder>() {

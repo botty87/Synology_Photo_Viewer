@@ -233,7 +233,7 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
         if (selectedPosition in firstPos..lastPos) {
             nextFocusView = getChildAt(selectedPosition - firstPos)
             if (mIsAutoProcessFocus && !mIsDrawFocusMoveAnim) {
-                scrollToView(nextFocusView, true)
+                scrollToView(nextFocusView)
             } else {
                 nextFocusView!!.requestFocus()
             }
@@ -559,7 +559,7 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
             if (mIsDrawFocusMoveAnim) {
                 updateSelectPositionInLayout(nextFocusView)
             }
-            scrollToView(nextFocusView, true)
+            scrollToView(nextFocusView)
             true
         }
     }
@@ -578,7 +578,7 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
 
     //TODO verify smooth
     @SuppressLint("LogNotTimber")
-    private fun scrollToView(view: View?, smooth: Boolean) {
+    /*private fun scrollToView(view: View?, smooth: Boolean) {
         val scrollDistance = getNeedScrollDistance(view)
         if (DEBUG) {
             Log.d(TAG, "scrollToView: scrollDistance==$scrollDistance")
@@ -589,6 +589,17 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
             } else {
                 scrollToView(scrollDistance)
             }
+        }
+        startFocusMoveAnim()
+    }*/
+
+    private fun scrollToView(view: View?) {
+        val scrollDistance = getNeedScrollDistance(view)
+        if (DEBUG) {
+            Log.d(TAG, "scrollToView: scrollDistance==$scrollDistance")
+        }
+        if (scrollDistance != 0) {
+            smoothScrollView(scrollDistance)
         }
         startFocusMoveAnim()
     }
@@ -926,7 +937,7 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
                     targetView.requestFocus()
                 } else {
                     nextFocusView = targetView
-                    scrollToView(targetView, true)
+                    scrollToView(targetView)
                 }
             }
             /*if (targetView == null) {

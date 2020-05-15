@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
-import com.botty.photoviewer.tools.isNotNull
-import com.botty.photoviewer.tools.network.responses.containers.Share
+import com.botty.photoviewer.components.isNotNull
+import com.botty.photoviewer.components.network.responses.containers.Share
 import kotlinx.android.synthetic.main.gallery_folder_item.view.*
 import kotlinx.android.synthetic.main.gallery_parent_folder.view.*
 

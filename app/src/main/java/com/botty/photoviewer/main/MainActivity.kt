@@ -2,24 +2,23 @@ package com.botty.photoviewer.main
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.main.GalleriesAdapter
 import com.botty.photoviewer.addGallery.AddShareActivity
+import com.botty.photoviewer.components.GridAutofitLayoutManager
+import com.botty.photoviewer.components.loadAdWithFailListener
+import com.botty.photoviewer.components.startActivity
 import com.botty.photoviewer.data.Gallery
-import com.botty.photoviewer.galleryViewer.GalleryViewActivity
+import com.botty.photoviewer.galleryViewer.galleryView.GalleryViewActivity
 import com.botty.photoviewer.settings.SettingsActivity
-import com.botty.photoviewer.tools.GridAutofitLayoutManager
-import com.botty.photoviewer.tools.loadAdWithFailListener
-import com.botty.photoviewer.tools.network.Network
-import com.botty.photoviewer.tools.startActivity
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : FragmentActivity() {
 
-    private val mainViewModel by lazy { ViewModelProvider(this).get(MainViewModel::class.java) }
+    private val mainViewModel: MainViewModel by viewModel()
 
     private val galleriesAdapter by lazy {
         GalleriesAdapter(Glide.with(this)).apply {
@@ -38,11 +37,8 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         adView.loadAdWithFailListener()
-        loadGalleries()
-    }
 
-    private fun loadGalleries() {
-        mainViewModel.galleriesLiveData.observe(this) { galleries ->
+        mainViewModel.galleries.observe(this) { galleries ->
             galleriesAdapter.setNewGalleries(galleries)
         }
     }
@@ -59,8 +55,8 @@ class MainActivity : FragmentActivity() {
         startActivity<SettingsActivity>()
     }
 
-    override fun onDestroy() {
+    /*override fun onDestroy() {
         Network.clean()
         super.onDestroy()
-    }
+    }*/
 }
