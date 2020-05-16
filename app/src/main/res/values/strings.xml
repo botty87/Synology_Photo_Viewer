@@ -25,7 +25,6 @@
     <string name="con_params_changed_error">Did you change your connection settings? Like password, user or address?</string>
     <string name="port">Port (optional)</string>
     <string name="use_https">Use https</string>
-    <string name="connection_exist">Connection already exist!</string>
     <string name="album">Album</string>
     <string name="loading">Loading…</string>
     <string name="timeoutException">Timeout exception</string>

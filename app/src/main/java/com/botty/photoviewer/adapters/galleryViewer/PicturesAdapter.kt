@@ -8,13 +8,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.botty.photoviewer.R
+import com.botty.photoviewer.activities.galleryViewer.CacheMetadata
 import com.botty.photoviewer.adapters.GenericHolder
 import com.botty.photoviewer.components.Tools
 import com.botty.photoviewer.components.clear
 import com.botty.photoviewer.components.glide.GlideTools
 import com.botty.photoviewer.components.showErrorToast
-import com.botty.photoviewer.data.PictureContainer
-import com.botty.photoviewer.galleryViewer.CacheMetadata
+import com.botty.photoviewer.data.remoteFolder.PictureContainer
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_item.view.*
 import org.koin.core.KoinComponent
@@ -62,6 +62,7 @@ class PicturesAdapter(private val pictureMetaCache: CacheMetadata,
                 }
             }
 
+            //TODO review!
             picture.timeoutException -> {
                 GlideTools.setErrorImage(glideManager, holder.itemView.imageViewPicture)
                 context.showErrorToast(R.string.timeoutException)
@@ -92,7 +93,7 @@ class PicturesAdapter(private val pictureMetaCache: CacheMetadata,
     }
 
     fun setNewPictures(pictures: List<PictureContainer>) {
-        this.picturesList = pictures
+        picturesList = pictures
         notifyDataSetChanged()
     }
 }

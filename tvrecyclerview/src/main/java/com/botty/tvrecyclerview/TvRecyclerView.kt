@@ -576,23 +576,6 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
         startFocusMoveAnim()
     }
 
-    //TODO verify smooth
-    @SuppressLint("LogNotTimber")
-    /*private fun scrollToView(view: View?, smooth: Boolean) {
-        val scrollDistance = getNeedScrollDistance(view)
-        if (DEBUG) {
-            Log.d(TAG, "scrollToView: scrollDistance==$scrollDistance")
-        }
-        if (scrollDistance != 0) {
-            if (smooth) {
-                smoothScrollView(scrollDistance)
-            } else {
-                scrollToView(scrollDistance)
-            }
-        }
-        startFocusMoveAnim()
-    }*/
-
     private fun scrollToView(view: View?) {
         val scrollDistance = getNeedScrollDistance(view)
         if (DEBUG) {

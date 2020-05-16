@@ -3,8 +3,6 @@ package com.botty.photoviewer.data.connectionContainers
 import android.os.Parcel
 import android.os.Parcelable
 
-// val connectionId: Long = 0L removed
-
 class SessionParams(address: String,
                          val sid: String,
                          port: Int,

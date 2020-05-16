@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.botty.photoviewer.R
 import com.botty.photoviewer.adapters.GenericHolder
 import com.botty.photoviewer.components.isNotNull
-import com.botty.photoviewer.components.network.responses.containers.Share
+import com.botty.photoviewer.data.remoteFolder.RemoteItem
 import kotlinx.android.synthetic.main.gallery_folder_item.view.*
 import kotlinx.android.synthetic.main.gallery_parent_folder.view.*
 
@@ -16,7 +16,7 @@ class FoldersAdapter: RecyclerView.Adapter<GenericHolder>() {
         private const val BACK_TYPE = 2
     }
 
-    var folders = emptyList<Share>()
+    var folders = emptyList<RemoteItem>()
     private set
     var parentName: String? = null
     private set
@@ -56,7 +56,7 @@ class FoldersAdapter: RecyclerView.Adapter<GenericHolder>() {
         }
     }
 
-    fun setFolders(folders: List<Share>, parentName: String? = null) {
+    fun setFolders(folders: List<RemoteItem>, parentName: String? = null) {
         this.folders = folders
         this.parentName = parentName
         notifyDataSetChanged()

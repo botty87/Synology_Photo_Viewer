@@ -1,7 +1,13 @@
 package com.botty.photoviewer.di
 
 import com.botty.photoviewer.BuildConfig
-import com.botty.photoviewer.addGallery.AddShareViewModel
+import com.botty.photoviewer.activities.addGallery.AddShareViewModel
+import com.botty.photoviewer.activities.galleryViewer.fullscreenView.FullscreenViewModel
+import com.botty.photoviewer.activities.galleryViewer.galleryView.GalleryViewActivity
+import com.botty.photoviewer.activities.galleryViewer.galleryView.GalleryViewModel
+import com.botty.photoviewer.activities.galleryViewer.loader.GalleryContainer
+import com.botty.photoviewer.activities.galleryViewer.loader.PicturesLoader
+import com.botty.photoviewer.activities.main.MainViewModel
 import com.botty.photoviewer.components.network.*
 import com.botty.photoviewer.data.Settings
 import com.botty.photoviewer.data.connectionContainers.ConnectionParams
@@ -9,13 +15,8 @@ import com.botty.photoviewer.data.connectionContainers.SessionParams
 import com.botty.photoviewer.data.db.AppDB
 import com.botty.photoviewer.data.db.ObjectBox
 import com.botty.photoviewer.di.repos.ConnectionsRepo
+import com.botty.photoviewer.di.repos.FoldersRepo
 import com.botty.photoviewer.di.repos.GalleriesRepo
-import com.botty.photoviewer.galleryViewer.fullscreenView.FullscreenViewModel
-import com.botty.photoviewer.galleryViewer.galleryView.GalleryViewActivity
-import com.botty.photoviewer.galleryViewer.galleryView.GalleryViewModel
-import com.botty.photoviewer.galleryViewer.loader.GalleryContainer
-import com.botty.photoviewer.galleryViewer.loader.PicturesLoader
-import com.botty.photoviewer.main.MainViewModel
 import com.botty.photoviewer.settings.SettingsActivityViewModel
 import com.bumptech.glide.Glide
 import org.koin.android.ext.koin.androidContext
@@ -53,13 +54,14 @@ val scopedModules = module {
     scope<GalleryViewActivity> {
         scoped { (galleryId: Long) -> get<GalleriesRepo>().getGallery(galleryId) } //Get gallery
         scoped { GalleryContainer()}
+        scoped<FoldersRepo> { FoldersRepoNetImpl(get()) }
 
         this.scoped {
             Glide.with(androidContext())
         }
 
         viewModel {
-            (galleryId: Long) -> GalleryViewModel(get { parametersOf(galleryId) }, get { parametersOf(galleryId) } )
+            (galleryId: Long) -> GalleryViewModel(get { parametersOf(galleryId) }, get { parametersOf(galleryId) }, get() )
         }
 
         viewModel{ PicturesLoader(get(), get()) }

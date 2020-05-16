@@ -32,12 +32,12 @@
         <meta-data android:name="firebase_crashlytics_collection_enabled"
             android:value="${enableCrashReporting}" />
 
-        <activity android:name=".galleryViewer.fullscreenView.FullscreenViewerActivity" />
-        <activity android:name=".galleryViewer.galleryView.GalleryViewActivity" />
-        <activity android:name=".addGallery.AddShareActivity" />
+        <activity android:name=".activities.galleryViewer.fullscreenView.FullscreenViewerActivity" />
+        <activity android:name=".activities.galleryViewer.galleryView.GalleryViewActivity" />
+        <activity android:name=".activities.addGallery.AddShareActivity" />
         <activity android:name=".settings.SettingsActivity" />
         <activity
-            android:name=".main.MainActivity"
+            android:name="com.botty.photoviewer.activities.main.MainActivity"
             android:banner="@drawable/banner"
             android:icon="@drawable/banner"
             android:logo="@drawable/banner">

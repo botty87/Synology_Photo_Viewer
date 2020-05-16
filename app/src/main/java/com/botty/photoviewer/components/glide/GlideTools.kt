@@ -5,7 +5,7 @@ import android.graphics.Color
 import android.widget.ImageView
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.botty.photoviewer.R
-import com.botty.photoviewer.data.PictureContainer
+import com.botty.photoviewer.data.remoteFolder.PictureContainer
 import com.bumptech.glide.RequestManager
 
 object GlideTools {
@@ -27,10 +27,10 @@ object GlideTools {
     }
 
     fun loadWebpImageIntoView(glide: RequestManager,
-                      imageView: ImageView,
-                      pictureContainer: PictureContainer,
-                      context: Context,
-                      rotation: Int) {
+                              imageView: ImageView,
+                              pictureContainer: PictureContainer,
+                              context: Context,
+                              rotation: Int) {
 
         when(rotation) {
             PictureContainer.ROTATE_90 -> {
@@ -56,10 +56,10 @@ object GlideTools {
     }
 
     private fun loadImage(glide: RequestManager,
-                  imageView: ImageView,
-                  pictureContainer: PictureContainer,
-                  context: Context,
-                  rotateTransformation: RotateTransformation? = null) {
+                          imageView: ImageView,
+                          pictureContainer: PictureContainer,
+                          context: Context,
+                          rotateTransformation: RotateTransformation? = null) {
         glide
             .load(pictureContainer.file!!)
             .placeholder(getPlaceHolder(context))

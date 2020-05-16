@@ -9,8 +9,9 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import androidx.viewpager.widget.PagerAdapter
 import com.botty.photoviewer.R
 import com.botty.photoviewer.components.glide.GlideTools
-import com.botty.photoviewer.data.PictureContainer
+import com.botty.photoviewer.components.showErrorToast
 import com.botty.photoviewer.data.PictureMetaContainer
+import com.botty.photoviewer.data.remoteFolder.PictureContainer
 import com.bumptech.glide.RequestManager
 import kotlinx.android.synthetic.main.picture_fullscreen_item.view.*
 import org.koin.core.KoinComponent
@@ -50,10 +51,11 @@ class PicturesAdapter(
                 GlideTools.loadImageIntoView(glide, containerView.imageViewPicture, picture, context)
             }
 
-            /*picture.timeoutException -> {
+            // TODO review!
+            picture.timeoutException -> {
                 GlideTools.setErrorImage(glide, containerView.imageViewPicture)
-                context.showErrorToast(R.string.timeoutException) TODO review!
-            }*/
+                context.showErrorToast(R.string.timeoutException)
+            }
 
             else -> CircularProgressDrawable(context).apply {
                 strokeWidth = 5f

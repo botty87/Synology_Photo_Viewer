@@ -48,6 +48,4 @@ class ConnectionParams(address: String,
         const val DEFAULT_HTTP_PORT = 5000
         const val DEFAULT_HTTPS_PORT = 5001
     }
-
-    class ConnectionExistException: Exception()
 }

@@ -40,7 +40,7 @@ class MyApplication: Application(), KoinComponent {
             )
         }
 
-        MobileAds.initialize(this, get<String>(named(ADS_ID))) //TODO resolve with di
+        MobileAds.initialize(this, get<String>(named(ADS_ID)))
         if (BuildConfig.DEBUG) {
             Timber.plant(DebugTree())
             val started = AndroidObjectBrowser(get<ObjectBox>().boxStore).start(this)
