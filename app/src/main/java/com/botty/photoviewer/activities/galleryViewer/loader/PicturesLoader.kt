@@ -110,7 +110,6 @@ class PicturesLoader (private val glide: RequestManager,
         }
     }
 
-    //TODO Improve the notification system
     private suspend fun downloadAndNotify(picIndex: Int) = withContext(Dispatchers.IO) {
         if(picIndex < 0) {
             return@withContext

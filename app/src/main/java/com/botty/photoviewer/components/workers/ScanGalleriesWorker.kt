@@ -2,15 +2,27 @@ package com.botty.photoviewer.components.workers
 
 import android.content.Context
 import androidx.work.*
+import com.botty.photoviewer.components.log
+import com.botty.photoviewer.components.network.FoldersRepoNet
+import com.botty.photoviewer.components.network.LoginManager
+import com.botty.photoviewer.components.network.Network
+import com.botty.photoviewer.data.Gallery
+import com.botty.photoviewer.data.fileStructure.MediaFile
+import com.botty.photoviewer.data.fileStructure.MediaFolder
+import com.botty.photoviewer.data.remoteFolder.FolderContent
+import com.botty.photoviewer.data.remoteFolder.RemoteItem
 import com.botty.photoviewer.di.repos.DBFilesRepo
 import com.botty.photoviewer.di.repos.DBFoldersRepo
 import com.botty.photoviewer.di.repos.GalleriesRepo
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.koin.core.KoinComponent
+import org.koin.core.get
 import org.koin.core.inject
+import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params), KoinComponent {
 
@@ -19,11 +31,6 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
     private val dbFilesRepo: DBFilesRepo by inject()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        return@withContext Result.success()
-    }
-
-    //TODO restore!!!
-    /*override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
 
         val galleryId = inputData.getLong(GALLERY_ID, 0L)
         val folderId = inputData.getLong(FOLDER_ID, 0L)
@@ -42,14 +49,16 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
         val jobs = galleries.map { gallery ->
             async(Dispatchers.IO) {
                 val network = getNetwork(gallery)
-                val foldersRepoNet = get<FoldersRepoNet>{ parametersOf(network) }
+                val foldersRepoNet = get<FoldersRepoNet>{ parametersOf(network, gallery) }
 
                 if(folderId == 0L) {
                     dbFilesRepo.removeGalleryFiles(gallery.id)
                     dbFoldersRepo.removeGalleryFolders(gallery.id)
 
                     gallery.folder.target = MediaFolder(name = gallery.name, galleryId = gallery.id)
+                    gallery.lastSync = null
                     galleriesRepo.saveGallery(gallery)
+
                     scanGallery(foldersRepoNet, gallery.path, gallery.folder.target, true)
                     gallery.lastSync = Date()
                     galleriesRepo.saveGallery(gallery)
@@ -68,9 +77,6 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
             return@withContext Result.failure(workDataOf(ERROR_KEY to (e.localizedMessage ?: e.message)))
         }
 
-        //ScanGalleriesPref.isFirstSyncNeeded = false TODO improve
-
-        //return@withContext Result.success(workDataOf(FOLDER_ID to newMainFolderId))
         return@withContext Result.success()
     }
 
@@ -83,12 +89,14 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
     private suspend fun scanGallery(foldersRepoNet: FoldersRepoNet, path: String,
                                     mainFolder: MediaFolder, mainPath: Boolean) {
 
-        fun fillDB(folderContent: FolderContent) {
+        fun fillDB(folderContent: FolderContent, folderPath: String) {
             val subFolders = mutableListOf<Pair<String, MediaFolder>>()
             folderContent.folders.forEach { folder ->
                 val mediaFolder = MediaFolder(name = folder.name, galleryId = mainFolder.galleryId)
                 mainFolder.childFolders.add(mediaFolder)
-                subFolders.add(folder.path to mediaFolder)
+
+                //we can perform this cast because the result is always (obviously) from the remote
+                subFolders.add((folder as RemoteItem).path to mediaFolder)
             }
 
             folderContent.pictures.forEach { picture ->
@@ -109,8 +117,8 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
             }
         }
 
-        fillDB(foldersRepoNet.loadFolderContent(path))
-    } */
+        fillDB(foldersRepoNet.loadFolderPath(path), path)
+    }
 
     companion object {
         const val TAG = "scan_galleries_job"

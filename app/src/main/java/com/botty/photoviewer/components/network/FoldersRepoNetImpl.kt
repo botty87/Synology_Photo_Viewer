@@ -8,32 +8,21 @@ import com.botty.photoviewer.data.remoteFolder.RemoteItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class FoldersRepoNetImpl(private var galleryContainer: GalleryContainer, gallery: Gallery) : FoldersRepoNet {
-    override var pathTree = mutableListOf(gallery.path)
+class FoldersRepoNetImpl : FoldersRepoNet {
+    private var galleryContainer: GalleryContainer?
+    override var pathTree: MutableList<String>
+    private lateinit var network: Network
 
-    /*constructor(network: Network) {
+    constructor(galleryContainer: GalleryContainer, gallery: Gallery) {
+        this.galleryContainer = galleryContainer
+        this.pathTree = mutableListOf(gallery.path)
+    }
+
+    constructor(network: Network, gallery: Gallery) {
         this.network = network
-    }*/
-
-    /*override suspend fun loadFolderContent(path: String): FolderContent {
-
-        val response = withContext(Dispatchers.IO) {
-            galleryContainer.network.getFoldersContent(path)
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        return withContext(Dispatchers.Default) {
-            val folders = response.files.filter { file ->
-                file.isdir && file.isNotHidden
-            } as List<RemoteItem>
-
-            val pictures = response.files.filter { file ->
-                file.isPicture && file.isNotHidden
-            } as List<RemoteItem>
-
-             FolderContent(folders, pictures)
-        }
-    }*/
+        this.galleryContainer = null
+        this.pathTree = mutableListOf(gallery.path)
+    }
 
     override suspend fun loadChildFolders(folderName: String): FolderContent {
         return loadFolder(folderName)
@@ -55,10 +44,13 @@ class FoldersRepoNetImpl(private var galleryContainer: GalleryContainer, gallery
         pathTree.forEach { path ->
             stringPathBuilder.append("$path/")
         }
-        val folderPath = stringPathBuilder.dropLast(1).toString()
+        return loadFolderPath(stringPathBuilder.dropLast(1).toString())
+    }
 
+    override suspend fun loadFolderPath(folderPath: String): FolderContent {
         val response = withContext(Dispatchers.IO) {
-            galleryContainer.network.getFoldersContent(folderPath)
+            val network = galleryContainer?.network ?: network
+            network.getFoldersContent(folderPath)
         }
 
         @Suppress("UNCHECKED_CAST")

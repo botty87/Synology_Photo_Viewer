@@ -63,8 +63,6 @@ class MainActivity : FragmentActivity() {
         }
 
         mainViewModel.checkDBSyncStatus()
-
-        startActivity<GalleryViewActivity>(Gallery.ID_TAG to 1L) // TODO remove!
     }
 
     private fun onAddNewClick() {

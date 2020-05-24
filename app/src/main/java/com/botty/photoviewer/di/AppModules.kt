@@ -10,6 +10,7 @@ import com.botty.photoviewer.activities.galleryViewer.loader.PicturesLoader
 import com.botty.photoviewer.activities.main.MainViewModel
 import com.botty.photoviewer.activities.settings.SettingsActivityViewModel
 import com.botty.photoviewer.components.network.*
+import com.botty.photoviewer.data.Gallery
 import com.botty.photoviewer.data.Settings
 import com.botty.photoviewer.data.connectionContainers.ConnectionParams
 import com.botty.photoviewer.data.connectionContainers.SessionParams
@@ -58,7 +59,7 @@ val scopedModules = module {
             if(get<Settings>().dbMode) {
                 FoldersRepoDBImpl(get())
             } else {
-                FoldersRepoNetImpl(get(), get())
+                FoldersRepoNetImpl(get<GalleryContainer>(), get())
             }
         }
 
@@ -90,7 +91,7 @@ val networkModule = module {
     factory<LoginManager> { (conParams: ConnectionParams) ->
         LoginManagerImpl(get{ parametersOf(conParams.baseUrl) }, conParams) }
 
-    //factory<FoldersRepoNet> { (network: Network) ->  FoldersRepoNetImpl(network) } todo restore
+    factory<FoldersRepoNet> { (network: Network, gallery: Gallery) ->  FoldersRepoNetImpl(network, gallery) }
 }
 
 val dbModule = module {

@@ -14,7 +14,6 @@ import org.koin.core.parameter.parametersOf
 import org.koin.ext.getScopeName
 import java.util.concurrent.TimeUnit
 
-//TODO test!
 class LogoutWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params), KoinComponent {
 
     override suspend fun doWork(): Result {
