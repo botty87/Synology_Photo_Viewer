@@ -97,8 +97,4 @@ class PicturesAdapter(private val pictureMetaCache: CacheMetadata,
         notifyDataSetChanged()
     }
 
-    fun clear() {
-        picturesList = emptyList()
-        notifyDataSetChanged()
-    }
 }

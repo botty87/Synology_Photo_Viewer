@@ -62,9 +62,4 @@ class FoldersAdapter: RecyclerView.Adapter<GenericHolder>() {
         notifyDataSetChanged()
     }
 
-    fun clear() {
-        this.folders = emptyList()
-        this.parentName = null
-        notifyDataSetChanged()
-    }
 }

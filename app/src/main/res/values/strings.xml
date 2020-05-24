@@ -40,4 +40,5 @@
     <string name="of">of</string>
     <string name="gallery_sync_progress">Galleries scan in progress...</string>
     <string name="completed">Completed</string>
+    <string name="daily_scan_message">Perform a daily scan of your galleries. Valid only in DB mode</string>
 </resources>

@@ -2,6 +2,7 @@ package com.botty.photoviewer.components.network
 
 import com.botty.photoviewer.components.network.responses.LogoutResponse
 import com.botty.photoviewer.components.network.responses.containers.GenericResponse
+import com.botty.photoviewer.dataRepositories.remote.impl.NetworkImpl
 import okhttp3.ResponseBody
 import retrofit2.Call
 import kotlin.coroutines.Continuation
@@ -17,7 +18,8 @@ abstract class ApiExecuter {
                 is GenericResponse<*> -> {
                     when {
                         response.isValid() -> resume(response)
-                        response.error?.newLoginNeeded == true -> resumeWithException(NetworkImpl.NewLoginException())
+                        response.error?.newLoginNeeded == true -> resumeWithException(
+                            NetworkImpl.NewLoginException())
                         response.error != null -> resumeWithException(Exception(response.error!!.message))
                         else -> resumeWithException(NetworkImpl.NoSuccessResponse())
                     }

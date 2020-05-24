@@ -2,18 +2,19 @@ package com.botty.photoviewer.components.workers
 
 import android.content.Context
 import androidx.work.*
+import com.botty.photoviewer.MyApplication
 import com.botty.photoviewer.components.log
-import com.botty.photoviewer.components.network.FoldersRepoNet
-import com.botty.photoviewer.components.network.LoginManager
-import com.botty.photoviewer.components.network.Network
 import com.botty.photoviewer.data.Gallery
 import com.botty.photoviewer.data.fileStructure.MediaFile
 import com.botty.photoviewer.data.fileStructure.MediaFolder
 import com.botty.photoviewer.data.remoteFolder.FolderContent
 import com.botty.photoviewer.data.remoteFolder.RemoteItem
-import com.botty.photoviewer.di.repos.DBFilesRepo
-import com.botty.photoviewer.di.repos.DBFoldersRepo
-import com.botty.photoviewer.di.repos.GalleriesRepo
+import com.botty.photoviewer.dataRepositories.localDB.DBFilesRepo
+import com.botty.photoviewer.dataRepositories.localDB.DBFoldersRepo
+import com.botty.photoviewer.dataRepositories.localDB.GalleriesRepo
+import com.botty.photoviewer.dataRepositories.remote.FoldersRepoNet
+import com.botty.photoviewer.dataRepositories.remote.LoginManager
+import com.botty.photoviewer.dataRepositories.remote.Network
 import kotlinx.coroutines.*
 import org.koin.core.KoinComponent
 import org.koin.core.get
@@ -31,6 +32,10 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
     private val dbFilesRepo: DBFilesRepo by inject()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+
+        if((applicationContext as MyApplication).isGalleryViewerOpened) {
+            return@withContext Result.retry()
+        }
 
         val galleryId = inputData.getLong(GALLERY_ID, 0L)
         val folderId = inputData.getLong(FOLDER_ID, 0L)
@@ -124,29 +129,44 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
         const val TAG = "scan_galleries_job"
         private const val GALLERY_ID = "gallery_id"
         const val FOLDER_ID = "folder_id"
-        //private const val DAILY_SYNC_TAG = "dailysync_tag"
 
         const val DONE_GALLERIES = "done_GAL"
         const val TOTAL_GALLERIES = "tot_gal"
 
         const val ERROR_KEY = "scan_error"
 
-        fun setWorker(context: Context, galleryId: Long = 0L, folderId: Long = 0L): UUID {
+        fun setWorker(context: Context, galleryId: Long = 0L, folderId: Long = 0L, daily: Boolean = false) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
             val inputData = workDataOf(GALLERY_ID to galleryId, FOLDER_ID to folderId)
 
-            val work = OneTimeWorkRequestBuilder<ScanGalleriesWorker>()
-                .addTag(TAG)
-                .setConstraints(constraints)
-                .setInputData(inputData)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
-                .build()
+            if(daily) {
+                PeriodicWorkRequestBuilder<ScanGalleriesWorker>(1, TimeUnit.DAYS)
+                    .addTag(TAG)
+                    .setConstraints(constraints)
+                    .setInputData(inputData)
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+                    .build()
+                    .run {
+                        WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, this)
+                    }
+            } else {
+                OneTimeWorkRequestBuilder<ScanGalleriesWorker>()
+                    .addTag(TAG)
+                    .setConstraints(constraints)
+                    .setInputData(inputData)
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+                    .build()
+                    .run {
+                        WorkManager.getInstance(context).enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, this)
+                    }
+            }
+        }
 
-            WorkManager.getInstance(context).enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, work)
-            return work.id
+        fun cancelWorks(context: Context) {
+            WorkManager.getInstance(context).cancelAllWorkByTag(TAG)
         }
     }
 }

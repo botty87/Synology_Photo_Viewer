@@ -4,13 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.botty.photoviewer.activities.galleryViewer.CacheMetadata
 import com.botty.photoviewer.activities.galleryViewer.loader.GalleryContainer
-import com.botty.photoviewer.components.network.LoginManager
 import com.botty.photoviewer.data.Gallery
 import com.botty.photoviewer.data.SimpleItem
 import com.botty.photoviewer.data.connectionContainers.SessionParams
 import com.botty.photoviewer.data.remoteFolder.FolderContent
 import com.botty.photoviewer.data.remoteFolder.PictureContainer
-import com.botty.photoviewer.di.repos.FoldersRepo
+import com.botty.photoviewer.dataRepositories.FoldersRepo
+import com.botty.photoviewer.dataRepositories.remote.LoginManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent

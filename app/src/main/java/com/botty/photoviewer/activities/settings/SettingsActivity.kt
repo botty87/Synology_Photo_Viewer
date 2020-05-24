@@ -17,7 +17,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : FragmentActivity() {
 
-    private val viewModel: SettingsActivityViewModel by viewModel()
+    private val viewModel: SettingsViewModel by viewModel()
 
     private val galleriesAdapter by lazy {
         recyclerViewGalleries.setHasFixedSize(true)
@@ -61,6 +61,17 @@ class SettingsActivity : FragmentActivity() {
         checkBoxDBMode.isChecked = viewModel.dbMode
         checkBoxDBMode.setOnCheckedChangeListener { _, checked ->
             viewModel.dbMode = checked
+            if(checked) {
+                checkBoxDailyScan.isEnabled = true
+            } else {
+                checkBoxDailyScan.isChecked = false
+                checkBoxDailyScan.isEnabled = false
+            }
+        }
+
+        checkBoxDailyScan.isChecked = viewModel.dailyScan
+        checkBoxDailyScan.setOnCheckedChangeListener { _, checked ->
+            viewModel.dailyScan = checked
         }
 
         editTextPresentationTimeout.setText(viewModel.presentationTimeout.toString())

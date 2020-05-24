@@ -57,11 +57,19 @@
                 android:layout_marginTop="15dp"
                 android:text="@string/db_mode_description"/>
 
+            <CheckBox
+                android:id="@+id/checkBoxDailyScan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/checkBoxDBMode"
+                android:layout_marginTop="15dp"
+                android:text="@string/daily_scan_message"/>
+
             <TextView
                 android:id="@+id/textViewGalleriesList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/checkBoxDBMode"
+                app:layout_constraintTop_toBottomOf="@id/checkBoxDailyScan"
                 android:layout_marginTop="15dp"
                 android:textSize="18sp"
                 android:gravity="center"

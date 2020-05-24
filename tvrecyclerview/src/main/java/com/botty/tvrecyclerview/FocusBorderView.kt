@@ -19,7 +19,7 @@ class FocusBorderView(context: Context?) : View(context) {
     private var mRightFocusBoundWidth = 0
     private var mBottomFocusBoundWidth = 0
 
-    var drawBorder = true
+    private var drawBorder = true
 
     var tvRecyclerView: TvRecyclerView?
         get() = mTvRecyclerView

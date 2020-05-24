@@ -10,6 +10,7 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.botty.photoviewer.MyApplication
 import com.botty.photoviewer.R
 import com.botty.photoviewer.activities.galleryViewer.fullscreenView.FullscreenViewerActivity
 import com.botty.photoviewer.activities.galleryViewer.loader.PicturesLoader
@@ -32,6 +33,8 @@ import org.koin.core.parameter.parametersOf
 import org.koin.androidx.scope.lifecycleScope as koinLifecycleScope
 
 class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
+
+    private var isFullscreenViewerActivityOpened = false
 
     private var galleryId: Long = 0 //It is read in the "on create"
     private val galleryViewModel: GalleryViewModel by koinLifecycleScope.viewModel(this) { parametersOf(galleryId) }
@@ -291,6 +294,8 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             PictureMetaContainer.ParcelablePair(entry.key, entry.value)
         }
 
+        isFullscreenViewerActivityOpened = true
+
         startActivityForResult<FullscreenViewerActivity>(
             FullscreenViewerActivity.PICTURES_LIST_KEY to galleryViewModel.pictures.value,
             FullscreenViewerActivity.PICTURE_GALLERY_PATH_KEY to galleryViewModel.currentGalleryPath,
@@ -298,8 +303,11 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
             FullscreenViewerActivity.METADATA_CACHE_LIST_KEY to picturesCacheContainer,
             FullscreenViewerActivity.CURRENT_PICTURE_KEY to pos) { result ->
 
+            isFullscreenViewerActivityOpened = false
             val currentPos = result.data?.getIntExtra(FullscreenViewerActivity.CURRENT_PICTURE_KEY, 0) ?: 0
             recyclerViewPictures.setItemSelected(currentPos)
+        }.onFailed {
+            isFullscreenViewerActivityOpened = false
         }
     }
 
@@ -311,8 +319,16 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    override fun onStop() {
-        LogoutWorker.setWorker(this, galleryViewModel.sessionParams)
-        super.onStop()
+    override fun onResume() {
+        super.onResume()
+        (application as MyApplication).isGalleryViewerOpened = true
+    }
+
+    override fun onPause() {
+        if(!isFullscreenViewerActivityOpened) {
+            LogoutWorker.setWorker(this, galleryViewModel.sessionParams)
+            (application as MyApplication).isGalleryViewerOpened = false
+        }
+        super.onPause()
     }
 }

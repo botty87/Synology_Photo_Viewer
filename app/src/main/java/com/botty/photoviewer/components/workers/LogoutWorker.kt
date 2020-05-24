@@ -3,15 +3,14 @@ package com.botty.photoviewer.components.workers
 import android.content.Context
 import androidx.work.*
 import com.botty.photoviewer.components.log
-import com.botty.photoviewer.components.network.Network
 import com.botty.photoviewer.data.connectionContainers.ConnectionParams
 import com.botty.photoviewer.data.connectionContainers.SessionParams
+import com.botty.photoviewer.dataRepositories.remote.Network
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
-import org.koin.ext.getScopeName
 import java.util.concurrent.TimeUnit
 
 class LogoutWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params), KoinComponent {
@@ -28,7 +27,7 @@ class LogoutWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 port,
                 https
             )
-        val network: Network by inject(getScopeName()){ parametersOf(sessionParams) }
+        val network: Network by inject{ parametersOf(sessionParams) }
 
         return withContext(Dispatchers.IO) {
             fun retry() =

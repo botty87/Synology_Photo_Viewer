@@ -687,14 +687,6 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
         }
     }
 
-    private fun scrollToView(scrollDistance: Int) {
-        if (mOrientation == HORIZONTAL) {
-            scrollBy(scrollDistance, 0)
-        } else {
-            scrollBy(0, scrollDistance)
-        }
-    }
-
     private fun getNormalScrollDistance(view: View?): Int {
         var distance = 0
         val viewMin = getDecoratedStart(view)
@@ -923,19 +915,6 @@ class TvRecyclerView @JvmOverloads constructor(context: Context?, attrs: Attribu
                     scrollToView(targetView)
                 }
             }
-            /*if (targetView == null) {
-                super.onStop()
-                return
-            }
-            if (selectedPosition != targetPosition) {
-                selectedPosition = targetPosition
-            }
-            if (!mIsAutoProcessFocus) {
-                targetView.requestFocus()
-            } else {
-                nextFocusView = targetView
-                scrollToView(targetView, true)
-            }*/
             super.onStop()
         }
     }
