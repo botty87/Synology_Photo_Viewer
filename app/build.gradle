@@ -11,8 +11,8 @@ android {
         applicationId "botty.synology.photoviewer"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 18
-        versionName "1.3"
+        versionCode 19
+        versionName "1.4-alpha1"
     }
     buildTypes {
         release {

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.Gravity
 import android.view.View
+import android.view.ViewTreeObserver
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -46,8 +47,10 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
         FoldersAdapter().apply {
             fun onFolderClick(position: Int) = launch {
+                val pippo = position
+                val folder = folders[position]
                 showLoader()
-                galleryViewModel.onFolderClick(folders[position])
+                galleryViewModel.onFolderClick(folder)
                 hideLoader()
             }
 
@@ -197,19 +200,23 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private fun initFoldersObserver() {
         galleryViewModel.folders.observe(this) { folders ->
-            val actualPath = galleryViewModel.actualPath
+            val pathTree = galleryViewModel.pathTree
             when {
-                actualPath.size > 1 -> {
-                    foldersAdapter.setFolders(folders, actualPath[actualPath.size - 2])
+                pathTree.size > 2 -> {
+                    foldersAdapter.setFolders(folders, pathTree[pathTree.size - 2])
                 }
-                actualPath.size == 1 -> {
+                pathTree.size == 2 -> {
                     foldersAdapter.setFolders(folders, galleryViewModel.gallery.name)
                 }
                 else -> {
                     foldersAdapter.setFolders(folders)
                 }
             }
-            textViewAlbumName.text = actualPath.lastOrNull() ?: galleryViewModel.gallery.name
+            textViewAlbumName.text = if(pathTree.size > 1) {
+                pathTree.last()
+            } else {
+                galleryViewModel.gallery.name
+            }
         }
     }
 
@@ -253,10 +260,17 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         textViewAlbumName.show()
         recyclerViewFolders.isFocusable = true
         recyclerViewFolders.requestFocus()
-        recyclerViewFolders.setItemSelected(0)
         recyclerViewPictures.isFocusable = true
         recyclerViewFolders.mFocusBorderView?.show()
         recyclerViewPictures.mFocusBorderView?.show()
+
+        lateinit var recyclerViewFoldersLayoutList: ViewTreeObserver.OnGlobalLayoutListener
+        recyclerViewFoldersLayoutList = ViewTreeObserver.OnGlobalLayoutListener {
+            Handler().postDelayed({recyclerViewFolders.setItemSelected(0)}, 100)
+            recyclerViewFolders.viewTreeObserver.removeOnGlobalLayoutListener(recyclerViewFoldersLayoutList)
+        }
+
+        recyclerViewFolders.viewTreeObserver.addOnGlobalLayoutListener(recyclerViewFoldersLayoutList)
     }
 
     private fun showLoader() {
@@ -290,7 +304,7 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
     }
 
     override fun onBackPressed() {
-        if(galleryViewModel.actualPath.isEmpty()) {
+        if(galleryViewModel.pathTree.size == 1) {
             super.onBackPressed()
         } else {
             onParentFolderClick()

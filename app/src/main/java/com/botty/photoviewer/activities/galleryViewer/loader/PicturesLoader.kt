@@ -110,11 +110,14 @@ class PicturesLoader (private val glide: RequestManager,
         }
     }
 
+    //TODO Improve the notification system
     private suspend fun downloadAndNotify(picIndex: Int) = withContext(Dispatchers.IO) {
+        if(picIndex < 0) {
+            return@withContext
+        }
         try {
             if (pictures[picIndex].file?.notExists() != false) {
                 val picFullPath =
-                    //gallCont.network.getPictureUrl(galleryPath!!, pictures[picIndex].name)
                     gallCont.network.getPictureUrl(gallCont.currentGalleryPath, pictures[picIndex].name)
                 glide
                     .asFile()
@@ -124,9 +127,13 @@ class PicturesLoader (private val glide: RequestManager,
                         downloadPictureFutureTargets.append(picIndex, this)
                     }.get()
                     .let { picFile ->
-                        pictures[picIndex].file = picFile
-                        pictureNotifier.postValue(picIndex)
-                        Timber.d("$debugTag pic $picIndex downloaded")
+                        try {
+                            pictures[picIndex].file = picFile
+                            pictureNotifier.postValue(picIndex)
+                            Timber.d("$debugTag pic $picIndex downloaded")
+                        } catch(e: IndexOutOfBoundsException) {
+                            e.log()
+                        }
                     }
             }
         } catch(e: IndexOutOfBoundsException) {

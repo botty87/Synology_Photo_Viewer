@@ -40,6 +40,7 @@ class MyApplication: Application(), KoinComponent {
             )
         }
 
+        //TODO correct
         MobileAds.initialize(this, get<String>(named(ADS_ID)))
         if (BuildConfig.DEBUG) {
             Timber.plant(DebugTree())

@@ -256,6 +256,7 @@ class AddShareActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
     private fun addGalleryAndClose(galleryName: String) {
         viewModel.addGalleryToDB(galleryName)
+        setResult(RESULT_OK)
         finish()
     }
 }

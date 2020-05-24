@@ -1,17 +1,17 @@
 package com.botty.photoviewer.activities.main
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.observe
 import com.botty.photoviewer.R
 import com.botty.photoviewer.activities.addGallery.AddShareActivity
 import com.botty.photoviewer.activities.galleryViewer.galleryView.GalleryViewActivity
+import com.botty.photoviewer.activities.settings.SettingsActivity
 import com.botty.photoviewer.adapters.main.GalleriesAdapter
-import com.botty.photoviewer.components.loadAdWithFailListener
-import com.botty.photoviewer.components.startActivity
+import com.botty.photoviewer.components.*
 import com.botty.photoviewer.components.views.GridAutofitLayoutManager
 import com.botty.photoviewer.data.Gallery
-import com.botty.photoviewer.settings.SettingsActivity
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -37,6 +37,7 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -45,10 +46,31 @@ class MainActivity : FragmentActivity() {
         mainViewModel.galleries.observe(this) { galleries ->
             galleriesAdapter.setNewGalleries(galleries)
         }
+
+        mainViewModel.syncStatus.observe(this) { syncStatus ->
+            if(syncStatus.active) {
+                val progressMessage = StringBuilder(getString(R.string.gallery_sync_progress))
+                progressMessage.appendln()
+                progressMessage.append("${getString(R.string.completed)} ${syncStatus.completedGallery} ${getString(R.string.of)} ${syncStatus.totalGalleries}")
+                textViewSyncProgress.text = progressMessage.toString()
+                mainLayout.hide()
+                syncLayout.show()
+            } else {
+                syncLayout.hide(true)
+                mainLayout.show()
+                syncStatus.errorMessage?.run { showErrorToast(this) }
+            }
+        }
+
+        mainViewModel.checkDBSyncStatus()
+
+        startActivity<GalleryViewActivity>(Gallery.ID_TAG to 1L) // TODO remove!
     }
 
     private fun onAddNewClick() {
-        startActivity<AddShareActivity>()
+        startActivityForResult<AddShareActivity> {
+            mainViewModel.checkDBSyncStatus()
+        }
     }
 
     private fun onGalleryClick(gallery: Gallery) {
@@ -56,6 +78,8 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun onSettingsClick() {
-        startActivity<SettingsActivity>()
+        startActivityForResult<SettingsActivity> {
+            mainViewModel.checkDBSyncStatus()
+        }
     }
 }

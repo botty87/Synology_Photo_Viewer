@@ -8,16 +8,18 @@ import com.botty.photoviewer.activities.galleryViewer.galleryView.GalleryViewMod
 import com.botty.photoviewer.activities.galleryViewer.loader.GalleryContainer
 import com.botty.photoviewer.activities.galleryViewer.loader.PicturesLoader
 import com.botty.photoviewer.activities.main.MainViewModel
+import com.botty.photoviewer.activities.settings.SettingsActivityViewModel
 import com.botty.photoviewer.components.network.*
 import com.botty.photoviewer.data.Settings
 import com.botty.photoviewer.data.connectionContainers.ConnectionParams
 import com.botty.photoviewer.data.connectionContainers.SessionParams
 import com.botty.photoviewer.data.db.AppDB
+import com.botty.photoviewer.data.db.FoldersRepoDBImpl
 import com.botty.photoviewer.data.db.ObjectBox
 import com.botty.photoviewer.di.repos.ConnectionsRepo
-import com.botty.photoviewer.di.repos.FoldersRepo
+import com.botty.photoviewer.di.repos.DBFilesRepo
+import com.botty.photoviewer.di.repos.DBFoldersRepo
 import com.botty.photoviewer.di.repos.GalleriesRepo
-import com.botty.photoviewer.settings.SettingsActivityViewModel
 import com.bumptech.glide.Glide
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -30,7 +32,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 const val ADS_ID = "ads_id"
 
 val viewModelsModule = module {
-    viewModel { MainViewModel(get()) }
+    viewModel { MainViewModel(get(), get()) }
     viewModel { AddShareViewModel(get(), get()) }
     viewModel { SettingsActivityViewModel(get(), get()) }
     viewModel { (galleryContainer: GalleryContainer) -> PicturesLoader(get(), galleryContainer) }
@@ -38,8 +40,6 @@ val viewModelsModule = module {
 }
 
 val appModule = module {
-    single<ConnectionsRepo> { get<AppDB>() }
-    single<GalleriesRepo> { get<AppDB>() }
     single(named(ADS_ID)) {
         if(BuildConfig.DEBUG) {
             "ca-app-pub-3940256099942544~3347511713"
@@ -54,7 +54,13 @@ val scopedModules = module {
     scope<GalleryViewActivity> {
         scoped { (galleryId: Long) -> get<GalleriesRepo>().getGallery(galleryId) } //Get gallery
         scoped { GalleryContainer()}
-        scoped<FoldersRepo> { FoldersRepoNetImpl(get()) }
+        scoped {
+            if(get<Settings>().dbMode) {
+                FoldersRepoDBImpl(get())
+            } else {
+                FoldersRepoNetImpl(get(), get())
+            }
+        }
 
         this.scoped {
             Glide.with(androidContext())
@@ -83,10 +89,18 @@ val networkModule = module {
 
     factory<LoginManager> { (conParams: ConnectionParams) ->
         LoginManagerImpl(get{ parametersOf(conParams.baseUrl) }, conParams) }
+
+    //factory<FoldersRepoNet> { (network: Network) ->  FoldersRepoNetImpl(network) } todo restore
 }
 
 val dbModule = module {
-    single<AppDB> { get<ObjectBox>() }
-    single { Settings() }
     single { ObjectBox().apply { init(androidContext()) } }
+
+    single<AppDB> { get<ObjectBox>() }
+    single<ConnectionsRepo> { get<AppDB>() }
+    single<GalleriesRepo> { get<AppDB>() }
+    single<DBFilesRepo> { get<AppDB>() }
+    single<DBFoldersRepo> { get<AppDB>() }
+
+    single { Settings() }
 }

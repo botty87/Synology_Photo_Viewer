@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:692227462177343660",
-      "lastPropertyId": "12:4729490875592671422",
+      "lastPropertyId": "14:6697719217261894853",
       "name": "Gallery",
       "properties": [
         {
@@ -33,10 +33,17 @@
           "relationTarget": "ConnectionParams"
         },
         {
-          "id": "8:5472007276549612993",
-          "name": "headerToSet",
-          "type": 1,
-          "flags": 4
+          "id": "13:3392416847698409332",
+          "name": "folderId",
+          "indexId": "19:8010223055511969144",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "MediaFolder"
+        },
+        {
+          "id": "14:6697719217261894853",
+          "name": "lastSync",
+          "type": 10
         }
       ],
       "relations": []
@@ -81,10 +88,78 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "7:5053961954874232757",
+      "lastPropertyId": "4:4044523824053739124",
+      "name": "MediaFolder",
+      "properties": [
+        {
+          "id": "1:7609387854276852988",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5956300295629875921",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:1438006329759339404",
+          "name": "galleryId",
+          "indexId": "15:8108225362069797072",
+          "type": 6,
+          "flags": 12
+        },
+        {
+          "id": "4:4044523824053739124",
+          "name": "parentFolderId",
+          "indexId": "16:6337275362637898416",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "MediaFolder"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "8:5277980887508500415",
+      "lastPropertyId": "4:7723875627451600669",
+      "name": "MediaFile",
+      "properties": [
+        {
+          "id": "1:8644875141138066434",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4223164730033639894",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:705182936577001961",
+          "name": "galleryId",
+          "indexId": "17:8486191877358906593",
+          "type": 6,
+          "flags": 12
+        },
+        {
+          "id": "4:7723875627451600669",
+          "name": "folderId",
+          "indexId": "18:7847901670438019767",
+          "type": 11,
+          "flags": 1548,
+          "relationTarget": "MediaFolder"
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "6:8758153863059344589",
-  "lastIndexId": "14:681280016609658002",
+  "lastEntityId": "8:5277980887508500415",
+  "lastIndexId": "19:8010223055511969144",
   "lastRelationId": "2:669667728775646517",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
@@ -139,7 +214,8 @@
     2428882197819520306,
     5752718284983206324,
     188311699435377756,
-    4729490875592671422
+    4729490875592671422,
+    5472007276549612993
   ],
   "retiredRelationUids": [
     669667728775646517,

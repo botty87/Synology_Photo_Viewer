@@ -36,4 +36,8 @@
     <string name="remove_gallery_message">Are you sure to remove this gallery from your collection?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="db_mode_description">DB mode. Cache all your remote galleries structure locally. It is more faster when you load you galleries and folders, but require a first scan.</string>
+    <string name="of">of</string>
+    <string name="gallery_sync_progress">Galleries scan in progress...</string>
+    <string name="completed">Completed</string>
 </resources>

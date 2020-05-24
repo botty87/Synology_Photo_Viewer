@@ -35,7 +35,7 @@
         <activity android:name=".activities.galleryViewer.fullscreenView.FullscreenViewerActivity" />
         <activity android:name=".activities.galleryViewer.galleryView.GalleryViewActivity" />
         <activity android:name=".activities.addGallery.AddShareActivity" />
-        <activity android:name=".settings.SettingsActivity" />
+        <activity android:name="com.botty.photoviewer.activities.settings.SettingsActivity" />
         <activity
             android:name="com.botty.photoviewer.activities.main.MainActivity"
             android:banner="@drawable/banner"

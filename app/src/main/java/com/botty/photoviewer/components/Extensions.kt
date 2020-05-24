@@ -30,6 +30,10 @@ fun Context.showErrorToast(message: String, length: Int = Toasty.LENGTH_SHORT) {
     Toasty.error(this, message, length).show()
 }
 
+fun Context.showSuccesToast(stringRes: Int, length: Int = Toasty.LENGTH_SHORT) {
+    Toasty.success(this, stringRes, length).show()
+}
+
 fun View.show() {
     this.visibility = View.VISIBLE
 }
