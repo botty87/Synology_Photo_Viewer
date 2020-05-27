@@ -28,18 +28,19 @@ class MainViewModel(private val galleriesRepo: GalleriesRepo, private val androi
     val syncStatus = MutableLiveData(SyncStatus(false))
     private val syncLiveData = WorkManager.getInstance(androidContext).getWorkInfosByTagLiveData(ScanGalleriesWorker.TAG)
     private val syncObserver = Observer<List<WorkInfo>> { worksInfo ->
-        val workInfo = worksInfo.last()
-        if(workInfo.state.isFinished) {
-            //Error is present only on failure. Otherwise is null, and it is fine!
-            val errorMessage = workInfo.outputData.getString(ScanGalleriesWorker.ERROR_KEY)
-            syncStatus.postValue(SyncStatus(false, errorMessage = errorMessage))
-        } else {
-            if(workInfo.state == WorkInfo.State.RUNNING) {
-                val totalGalleries = workInfo.progress.getInt(TOTAL_GALLERIES, 0)
-                val doneGalleries = workInfo.progress.getInt(DONE_GALLERIES, 0)
-                syncStatus.postValue(SyncStatus(doneGalleries, totalGalleries))
+        worksInfo.lastOrNull()?.let { workInfo ->
+            if(workInfo.state.isFinished) {
+                //Error is present only on failure. Otherwise is null, and it is fine!
+                val errorMessage = workInfo.outputData.getString(ScanGalleriesWorker.ERROR_KEY)
+                syncStatus.postValue(SyncStatus(false, errorMessage = errorMessage))
             } else {
-                syncStatus.postValue(SyncStatus(false))
+                if(workInfo.state == WorkInfo.State.RUNNING) {
+                    val totalGalleries = workInfo.progress.getInt(TOTAL_GALLERIES, 0)
+                    val doneGalleries = workInfo.progress.getInt(DONE_GALLERIES, 0)
+                    syncStatus.postValue(SyncStatus(doneGalleries, totalGalleries))
+                } else {
+                    syncStatus.postValue(SyncStatus(false))
+                }
             }
         }
     }
