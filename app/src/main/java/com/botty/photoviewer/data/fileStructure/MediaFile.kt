@@ -11,9 +11,7 @@ class MediaFile(
     galleryId: Long,
 
     @Transient
-    var file: File? = null,
-    @Transient
-    var timeoutException: Boolean = false
+    var file: File? = null
 ) : BaseMedia(id, name, galleryId) {
     lateinit var folder: ToOne<MediaFolder>
 

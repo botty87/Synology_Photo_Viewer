@@ -29,8 +29,7 @@ import org.koin.core.inject
 import org.koin.core.parameter.parametersOf
 
 class GalleryViewModel (private val gallCont: GalleryContainer, val gallery: Gallery,
-                        private val foldersRepo: FoldersRepo, private val androidContext: Context
-): ViewModel(), KoinComponent {
+                        private val foldersRepo: FoldersRepo, private val applicationContext: Context): ViewModel(), KoinComponent {
 
     val folders = MutableLiveData<List<SimpleItem>>()
     private val loginManager: LoginManager by inject { parametersOf(gallery.connectionParams.target) }
@@ -61,7 +60,7 @@ class GalleryViewModel (private val gallCont: GalleryContainer, val gallery: Gal
     lateinit var sessionParams: SessionParams
         private set
 
-    private val folderScanLiveData = WorkManager.getInstance(androidContext).getWorkInfosByTagLiveData(GalleryFolderScanWorker.TAG)
+    private val folderScanLiveData = WorkManager.getInstance(applicationContext).getWorkInfosByTagLiveData(GalleryFolderScanWorker.TAG)
     private val syncObserver = Observer<List<WorkInfo>> { worksInfo ->
         viewModelScope.launch(Dispatchers.Default) {
             val foldersRepoDB = foldersRepo as FoldersRepoDB
@@ -95,7 +94,7 @@ class GalleryViewModel (private val gallCont: GalleryContainer, val gallery: Gal
                 }
             }
 
-            WorkManager.getInstance(androidContext).pruneWork()
+            WorkManager.getInstance(applicationContext).pruneWork()
         }
     }
 

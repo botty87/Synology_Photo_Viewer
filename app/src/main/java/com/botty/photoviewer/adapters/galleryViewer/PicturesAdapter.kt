@@ -62,7 +62,6 @@ class PicturesAdapter(private val pictureMetaCache: CacheMetadata,
                 }
             }
 
-            //TODO review!
             picture.timeoutException -> {
                 GlideTools.setErrorImage(glideManager, holder.itemView.imageViewPicture)
                 context.showErrorToast(R.string.timeoutException)

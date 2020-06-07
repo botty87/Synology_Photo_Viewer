@@ -51,7 +51,6 @@ class PicturesAdapter(
                 GlideTools.loadImageIntoView(glide, containerView.imageViewPicture, picture, context)
             }
 
-            // TODO review!
             picture.timeoutException -> {
                 GlideTools.setErrorImage(glide, containerView.imageViewPicture)
                 context.showErrorToast(R.string.timeoutException)

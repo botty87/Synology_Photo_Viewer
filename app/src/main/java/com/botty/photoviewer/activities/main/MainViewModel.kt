@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 
-class MainViewModel(private val galleriesRepo: GalleriesRepo, private val androidContext: Context) : ViewModel(), KoinComponent {
+class MainViewModel(private val galleriesRepo: GalleriesRepo, private val applicationContext: Context) : ViewModel(), KoinComponent {
     val galleries: LiveData<List<Gallery>> = galleriesRepo.galleriesLiveData
 
     private val settings: Settings by inject()
@@ -26,7 +26,7 @@ class MainViewModel(private val galleriesRepo: GalleriesRepo, private val androi
     private val dbFoldersRepo: DBFoldersRepo by inject()
 
     val syncStatus = MutableLiveData(SyncStatus(false))
-    private val syncLiveData = WorkManager.getInstance(androidContext).getWorkInfosByTagLiveData(ScanGalleriesWorker.TAG)
+    private val syncLiveData = WorkManager.getInstance(applicationContext).getWorkInfosByTagLiveData(ScanGalleriesWorker.TAG)
     private val syncObserver = Observer<List<WorkInfo>> { worksInfo ->
         worksInfo.lastOrNull()?.let { workInfo ->
             if(workInfo.state.isFinished) {
@@ -53,7 +53,7 @@ class MainViewModel(private val galleriesRepo: GalleriesRepo, private val androi
         viewModelScope.launch(Dispatchers.IO) {
             when {
                 !settings.dbMode -> {
-                    ScanGalleriesWorker.cancelWorks(androidContext)
+                    ScanGalleriesWorker.cancelWorks(applicationContext)
                     dbFilesRepo.removeAllFiles()
                     dbFoldersRepo.removeAllFolders()
                     galleriesRepo.galleries.apply {
@@ -74,7 +74,7 @@ class MainViewModel(private val galleriesRepo: GalleriesRepo, private val androi
     }
 
     private fun startSyncGalleries() {
-        ScanGalleriesWorker.setWorker(androidContext)
+        ScanGalleriesWorker.setWorker(applicationContext)
     }
 
     override fun onCleared() {

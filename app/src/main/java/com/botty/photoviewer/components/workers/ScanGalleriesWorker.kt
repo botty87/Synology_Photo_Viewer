@@ -54,8 +54,7 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
         val jobs = galleries.map { gallery ->
             async(Dispatchers.IO) {
                 val network = getNetwork(gallery)
-                //val foldersRepoNet = get<FoldersRepoNet>{ parametersOf(network, gallery) }
-                 val foldersRepoNet = get<FoldersRepoNet>{ parametersOf(network, null) } //TODO test
+                 val foldersRepoNet = get<FoldersRepoNet>{ parametersOf(network, null) }
 
                 dbFilesRepo.removeGalleryFiles(gallery.id)
                 dbFoldersRepo.removeGalleryFolders(gallery.id)
