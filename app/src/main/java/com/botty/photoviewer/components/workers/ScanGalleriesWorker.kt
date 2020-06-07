@@ -33,17 +33,17 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
 
+        if(runAttemptCount > 3) {
+            val errMessage = "too many failed, give up"
+            Timber.d(errMessage)
+            return@withContext Result.failure(workDataOf(ERROR_KEY to (errMessage)))
+        }
+
         if((applicationContext as MyApplication).isGalleryViewerOpened) {
             return@withContext Result.retry()
         }
 
-        val galleryId = inputData.getLong(GALLERY_ID, 0L)
-        val folderId = inputData.getLong(FOLDER_ID, 0L)
-
-        val galleries = if(galleryId == 0L)
-            galleriesRepo.galleries
-        else
-            listOf(galleriesRepo.getGallery(galleryId))
+        val galleries = galleriesRepo.galleriesWithNoSync
 
         setProgress(workDataOf(
             DONE_GALLERIES to 0,
@@ -54,24 +54,23 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
         val jobs = galleries.map { gallery ->
             async(Dispatchers.IO) {
                 val network = getNetwork(gallery)
-                val foldersRepoNet = get<FoldersRepoNet>{ parametersOf(network, gallery) }
+                //val foldersRepoNet = get<FoldersRepoNet>{ parametersOf(network, gallery) }
+                 val foldersRepoNet = get<FoldersRepoNet>{ parametersOf(network, null) } //TODO test
 
-                if(folderId == 0L) {
-                    dbFilesRepo.removeGalleryFiles(gallery.id)
-                    dbFoldersRepo.removeGalleryFolders(gallery.id)
+                dbFilesRepo.removeGalleryFiles(gallery.id)
+                dbFoldersRepo.removeGalleryFolders(gallery.id)
 
-                    gallery.folder.target = MediaFolder(name = gallery.name, galleryId = gallery.id)
-                    gallery.lastSync = null
-                    galleriesRepo.saveGallery(gallery)
+                gallery.folder.target = MediaFolder(name = gallery.name, galleryId = gallery.id)
+                gallery.lastSync = null
+                galleriesRepo.saveGallery(gallery)
 
-                    scanGallery(foldersRepoNet, gallery.path, gallery.folder.target, true)
-                    gallery.lastSync = Date()
-                    galleriesRepo.saveGallery(gallery)
-                    setProgress(workDataOf(
-                        DONE_GALLERIES to galleriesDone.incrementAndGet(),
-                        TOTAL_GALLERIES to galleries.size
-                    ))
-                }
+                scanGallery(foldersRepoNet, gallery.path, gallery.folder.target, true)
+                gallery.lastSync = Date()
+                galleriesRepo.saveGallery(gallery)
+                setProgress(workDataOf(
+                    DONE_GALLERIES to galleriesDone.incrementAndGet(),
+                    TOTAL_GALLERIES to galleries.size
+                ))
             }
         }
 
@@ -127,42 +126,25 @@ class ScanGalleriesWorker(appContext: Context, params: WorkerParameters) : Corou
 
     companion object {
         const val TAG = "scan_galleries_job"
-        private const val GALLERY_ID = "gallery_id"
-        const val FOLDER_ID = "folder_id"
 
         const val DONE_GALLERIES = "done_GAL"
         const val TOTAL_GALLERIES = "tot_gal"
 
         const val ERROR_KEY = "scan_error"
 
-        fun setWorker(context: Context, galleryId: Long = 0L, folderId: Long = 0L, daily: Boolean = false) {
+        fun setWorker(context: Context) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
-            val inputData = workDataOf(GALLERY_ID to galleryId, FOLDER_ID to folderId)
-
-            if(daily) {
-                PeriodicWorkRequestBuilder<ScanGalleriesWorker>(1, TimeUnit.DAYS)
-                    .addTag(TAG)
-                    .setConstraints(constraints)
-                    .setInputData(inputData)
-                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
-                    .build()
-                    .run {
-                        WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, this)
-                    }
-            } else {
-                OneTimeWorkRequestBuilder<ScanGalleriesWorker>()
-                    .addTag(TAG)
-                    .setConstraints(constraints)
-                    .setInputData(inputData)
-                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
-                    .build()
-                    .run {
-                        WorkManager.getInstance(context).enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, this)
-                    }
-            }
+            OneTimeWorkRequestBuilder<ScanGalleriesWorker>()
+                .addTag(TAG)
+                .setConstraints(constraints)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+                .build()
+                .run {
+                    WorkManager.getInstance(context).enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, this)
+                }
         }
 
         fun cancelWorks(context: Context) {

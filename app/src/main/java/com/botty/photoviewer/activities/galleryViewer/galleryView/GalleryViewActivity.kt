@@ -50,7 +50,6 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
 
         FoldersAdapter().apply {
             fun onFolderClick(position: Int) = launch {
-                val pippo = position
                 val folder = folders[position]
                 showLoader()
                 galleryViewModel.onFolderClick(folder)
@@ -200,9 +199,21 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         setPicturesOnFocusChange()
         setFoldersOnFocusChange()
     }
-
+    //Only in DB mode. We store the current folder id. If an update has the same id notify the user about the data update
     private fun initFoldersObserver() {
+        var currentFolderId = 0L
         galleryViewModel.folders.observe(this) { folders ->
+            val pippo = currentFolderId
+            val pluto = galleryViewModel.currentFolderId
+            when {
+                currentFolderId == 0L || currentFolderId != galleryViewModel.currentFolderId -> {
+                    currentFolderId = galleryViewModel.currentFolderId
+                }
+                currentFolderId == galleryViewModel.currentFolderId -> {
+                    Toasty.success(this, getString(R.string.album_folders_updated)).show()
+                }
+            }
+
             val pathTree = galleryViewModel.pathTree
             when {
                 pathTree.size > 2 -> {
@@ -223,19 +234,31 @@ class GalleryViewActivity : FragmentActivity(), CoroutineScope by MainScope() {
         }
     }
 
+    //Only in DB mode. We store the current folder id. If an update has the same id notify the user about the data update
     private fun initPictureObserver() {
+        var currentFolderId = 0L
         galleryViewModel.pictures.observe(this) { pictures ->
+            when {
+                currentFolderId == 0L || currentFolderId != galleryViewModel.currentFolderId -> {
+                    currentFolderId = galleryViewModel.currentFolderId
+                }
+                currentFolderId == galleryViewModel.currentFolderId -> {
+                    Toasty.success(this, getString(R.string.album_picture_updated)).show()
+                }
+            }
+
             //Useful to force clean
             recyclerViewPictures.adapter = null
             picturesAdapter.setNewPictures(pictures)
             recyclerViewPictures.adapter = picturesAdapter
-            picturesLoader.pictureNotifier.observe(this) { picIndex ->
-                recyclerViewPictures.adapter?.notifyItemChanged(picIndex)
-            }
             if(pictures.isEmpty()) {
                 return@observe
             }
             startDownloadPictures(false)
+        }
+
+        picturesLoader.pictureNotifier.observe(this) { picIndex ->
+            recyclerViewPictures.adapter?.notifyItemChanged(picIndex)
         }
     }
 

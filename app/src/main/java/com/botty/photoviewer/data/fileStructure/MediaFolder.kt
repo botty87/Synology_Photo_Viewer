@@ -2,19 +2,13 @@ package com.botty.photoviewer.data.fileStructure
 
 import io.objectbox.annotation.Backlink
 import io.objectbox.annotation.Entity
-import io.objectbox.annotation.Id
-import io.objectbox.annotation.Index
 import io.objectbox.relation.ToMany
 import io.objectbox.relation.ToOne
 
 @Entity
-data class MediaFolder(
-    @Id
-    var id: Long = 0,
-    val name: String,
-    @Index
-    val galleryId: Long
-) {
+class MediaFolder(id: Long = 0L, name: String, galleryId: Long) :
+    BaseMedia(id, name, galleryId) {
+
     lateinit var parentFolder: ToOne<MediaFolder>
 
     @Backlink(to = "folder")

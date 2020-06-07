@@ -17,7 +17,10 @@ import io.objectbox.BoxStore
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
 import io.objectbox.kotlin.query
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
+//TODO implement withContext
 class ObjectBox: AppDB {
     lateinit var boxStore: BoxStore
         private set
@@ -64,6 +67,31 @@ class ObjectBox: AppDB {
 
     override fun removeAllFolders() {
         mediaFolderBox.removeAll()
+    }
+
+    override fun getFolder(folderId: Long): MediaFolder
+            = mediaFolderBox[folderId]
+
+    override suspend fun updateFolder(folder: MediaFolder, foldersToAdd: List<MediaFolder>, foldersToRemove: List<MediaFolder>,
+                              filesToAdd: List<MediaFile>, filesToRemove: List<MediaFile>) = withContext(Dispatchers.IO) {
+        boxStore.runInTx {
+            folder.childFolders.addAll(foldersToAdd)
+            folder.childFiles.addAll(filesToAdd)
+            mediaFolderBox.put(folder)
+            mediaFileBox.remove(filesToRemove)
+
+            fun removeFolders(folders: List<MediaFolder>) {
+                folders.forEach { folder ->
+                    val childFolders = folder.childFolders
+                    removeFolders(childFolders)
+                    val childFiles = folder.childFiles
+                    mediaFileBox.remove(childFiles)
+                    mediaFolderBox.remove(folder)
+                }
+            }
+
+            removeFolders(foldersToRemove)
+        }
     }
 
     override fun removeGalleryFiles(galleryId: Long) {

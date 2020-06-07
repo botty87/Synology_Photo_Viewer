@@ -64,7 +64,7 @@ val scopedModules = module {
         }
 
         viewModel {
-            (galleryId: Long) -> GalleryViewModel(get { parametersOf(galleryId) }, get { parametersOf(galleryId) }, get() )
+            (galleryId: Long) -> GalleryViewModel(get { parametersOf(galleryId) }, get { parametersOf(galleryId) }, get(), get() )
         }
 
         viewModel{ PicturesLoader(get(), get()) }
@@ -96,7 +96,7 @@ val networkModule = module {
         }, conParams)
     }
 
-    factory<FoldersRepoNet> { (network: Network, gallery: Gallery) ->
+    factory<FoldersRepoNet> { (network: Network, gallery: Gallery?) ->
         FoldersRepoNetImpl(
             network,
             gallery

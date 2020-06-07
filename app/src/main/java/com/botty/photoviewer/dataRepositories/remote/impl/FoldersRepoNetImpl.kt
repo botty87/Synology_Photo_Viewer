@@ -1,6 +1,7 @@
 package com.botty.photoviewer.dataRepositories.remote.impl
 
 import com.botty.photoviewer.activities.galleryViewer.loader.GalleryContainer
+import com.botty.photoviewer.components.NoPathTreeException
 import com.botty.photoviewer.components.removeLast
 import com.botty.photoviewer.data.Gallery
 import com.botty.photoviewer.data.remoteFolder.FolderContent
@@ -12,7 +13,8 @@ import kotlinx.coroutines.withContext
 
 class FoldersRepoNetImpl : FoldersRepoNet {
     private var galleryContainer: GalleryContainer?
-    override var pathTree: MutableList<String>
+    override var pathTree: MutableList<String>?
+
     private lateinit var network: Network
 
     constructor(galleryContainer: GalleryContainer, gallery: Gallery) {
@@ -20,10 +22,12 @@ class FoldersRepoNetImpl : FoldersRepoNet {
         this.pathTree = mutableListOf(gallery.path)
     }
 
-    constructor(network: Network, gallery: Gallery) {
+    constructor(network: Network, gallery: Gallery? = null) {
         this.network = network
         this.galleryContainer = null
-        this.pathTree = mutableListOf(gallery.path)
+        pathTree = gallery?.path?.run {
+            mutableListOf(this)
+        }
     }
 
     override suspend fun loadChildFolders(folderName: String): FolderContent {
@@ -35,12 +39,14 @@ class FoldersRepoNetImpl : FoldersRepoNet {
     }
 
     override suspend fun loadParentFolder(): FolderContent {
-        pathTree.removeLast()
+        pathTree?.removeLast() ?: throw NoPathTreeException()
         return loadFolder()
     }
 
     private suspend fun loadFolder(folderName: String? = null): FolderContent {
-        folderName?.run { pathTree.add(this) }
+        folderName?.run {
+            pathTree?.add(this) ?: throw NoPathTreeException()
+        }
         return loadFolderPath(folderPath)
     }
 

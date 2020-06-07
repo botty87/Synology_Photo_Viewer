@@ -53,6 +53,7 @@ class MainViewModel(private val galleriesRepo: GalleriesRepo, private val androi
         viewModelScope.launch(Dispatchers.IO) {
             when {
                 !settings.dbMode -> {
+                    ScanGalleriesWorker.cancelWorks(androidContext)
                     dbFilesRepo.removeAllFiles()
                     dbFoldersRepo.removeAllFolders()
                     galleriesRepo.galleries.apply {
@@ -61,7 +62,6 @@ class MainViewModel(private val galleriesRepo: GalleriesRepo, private val androi
                         }
                     }.run { galleriesRepo.saveGalleries(this) }
                     syncStatus.postValue(SyncStatus(false))
-                    ScanGalleriesWorker.cancelWorks(androidContext)
                 }
                 galleriesRepo.hasGalleryToSync -> {
                     startSyncGalleries()

@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.AsyncListDiffer
+import com.botty.photoviewer.BuildConfig
 import com.github.florent37.inlineactivityresult.Result
 import com.github.florent37.inlineactivityresult.kotlin.KotlinActivityResult
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
@@ -140,11 +141,13 @@ fun Handler?.removeAll() {
 }
 
 fun AdView.loadAdWithFailListener() {
-    AdRequest.Builder().build().let { req ->
-        this.loadAd(req)
-        this.adListener = object: AdListener() {
-            override fun onAdFailedToLoad(errorCode : Int) {
-                LoadAdException(errorCode).log()
+    if(!BuildConfig.DEBUG) {
+        AdRequest.Builder().build().let { req ->
+            this.loadAd(req)
+            this.adListener = object : AdListener() {
+                override fun onAdFailedToLoad(errorCode: Int) {
+                    LoadAdException(errorCode).log()
+                }
             }
         }
     }

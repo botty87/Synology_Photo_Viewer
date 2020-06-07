@@ -38,7 +38,9 @@
     <string name="no">No</string>
     <string name="db_mode_description">DB mode. Cache all your remote galleries structure locally. It is more faster when you load you galleries and folders, but require a first scan.</string>
     <string name="of">of</string>
-    <string name="gallery_sync_progress">Galleries scan in progress...</string>
+    <string name="gallery_sync_progress">Galleries scan in progress…</string>
     <string name="completed">Completed</string>
     <string name="daily_scan_message">Perform a daily scan of your galleries. Valid only in DB mode</string>
+    <string name="album_folders_updated">Album folders updated!</string>
+    <string name="album_picture_updated">Album pictures updated!</string>
 </resources>
